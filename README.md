@@ -1,8 +1,8 @@
-### VEEXRAY ENGINE
+### VEEX ENGINE (XRAY VEEX EDITION)
 
 
 
-Veexray Engine it is Veex edition of the X-Ray Monolith 1.5.3
+Veex Engine it is fork of the X-Ray Monolith 1.5.3
 
 ...
 
