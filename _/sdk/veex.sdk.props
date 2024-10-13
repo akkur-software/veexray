@@ -11,7 +11,7 @@
   <PropertyGroup Label="OutputDirectories">
     <OutDir Condition="'$(ConfigurationType)'=='Application'"   >$(VeexSdkDir)exec\</OutDir>
     <OutDir Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(VeexSdkDir)exec\</OutDir>
-    <OutDir Condition="'$(ConfigurationType)'=='StaticLibrary'" >$(VeexSdkDir)libraries\</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='StaticLibrary'" >$(VeexLibrariesDir)\</OutDir>
     <IntDir>$(VeexIntermDir)$(ProjectName)\</IntDir>
   </PropertyGroup>
   
@@ -40,14 +40,14 @@
       <LargeAddressAware>true</LargeAddressAware>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ImportLibrary>$(VeexSdkDir)\$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>$(VeexLibrariesDir)\$(ProjectName).lib</ImportLibrary>
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>
         $(VeexSdkDir)libraries;
         %(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
-      <OutputFile>$(VeexSdkDir)libraries\$(ProjectName).lib</OutputFile>
+      <OutputFile>$(VeexLibrariesDir)\$(ProjectName).lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>  
   
