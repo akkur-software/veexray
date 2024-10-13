@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "engine", "engine", "{539036
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libogg", "sdk\projects\libogg\libogg.vcxproj", "{893887A1-3ABF-40A0-B931-CD0867010785}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtheora", "sdk\projects\libtheora\libtheora.vcxproj", "{0BDF3377-F84E-4B42-A605-B45AAA244CB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -25,12 +27,21 @@ Global
 		{893887A1-3ABF-40A0-B931-CD0867010785}.Verified|x64.Build.0 = Verified|x64
 		{893887A1-3ABF-40A0-B931-CD0867010785}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
 		{893887A1-3ABF-40A0-B931-CD0867010785}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.Release|x64.ActiveCfg = Release|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.Release|x64.Build.0 = Release|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.Release-AVX|x64.Build.0 = Release-AVX|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.Verified|x64.ActiveCfg = Verified|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.Verified|x64.Build.0 = Verified|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{893887A1-3ABF-40A0-B931-CD0867010785} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
+		{0BDF3377-F84E-4B42-A605-B45AAA244CB6} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65834E6F-2007-46A4-A141-FD0BA26E7533}
