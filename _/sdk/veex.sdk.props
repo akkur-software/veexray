@@ -9,9 +9,9 @@
   </PropertyGroup>
   
   <PropertyGroup Label="OutputDirectories">
-    <OutDir Condition="'$(ConfigurationType)'=='Application'"   >$(VeexSdkDir)exec</OutDir>
-    <OutDir Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(VeexSdkDir)exec</OutDir>
-    <OutDir Condition="'$(ConfigurationType)'=='StaticLibrary'" >$(VeexSdkDir)libraries</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='Application'"   >$(VeexSdkDir)exec\</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(VeexSdkDir)exec\</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='StaticLibrary'" >$(VeexSdkDir)libraries\</OutDir>
     <IntDir>$(VeexIntermDir)$(ProjectName)\</IntDir>
   </PropertyGroup>
   
