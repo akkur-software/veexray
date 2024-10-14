@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nvtt", "sdk\projects\nvtt\n
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ode", "sdk\projects\ode\ode.vcxproj", "{1BF75FEB-87DD-486C-880B-227987D191C2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openal32", "sdk\projects\openal\openal32.vcxproj", "{566551F4-4EF1-4CB4-A131-F982E7606907}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -85,6 +87,14 @@ Global
 		{1BF75FEB-87DD-486C-880B-227987D191C2}.Verified|x64.Build.0 = Verified|x64
 		{1BF75FEB-87DD-486C-880B-227987D191C2}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
 		{1BF75FEB-87DD-486C-880B-227987D191C2}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.Release|x64.ActiveCfg = Release|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.Release|x64.Build.0 = Release|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.Release-AVX|x64.Build.0 = Release-AVX|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.Verified|x64.ActiveCfg = Verified|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.Verified|x64.Build.0 = Verified|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
+		{566551F4-4EF1-4CB4-A131-F982E7606907}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +107,7 @@ Global
 		{772FE450-F4F3-4687-A2A7-5624825089D7} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{1BF75FEB-87DD-486C-880B-227987D191C2} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
+		{566551F4-4EF1-4CB4-A131-F982E7606907} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65834E6F-2007-46A4-A141-FD0BA26E7533}
