@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openal32", "sdk\projects\op
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "reshade-compat", "sdk\projects\reshade-compat\reshade-compat.vcxproj", "{9646DBF8-1A5E-41F0-9328-F65910706666}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libjpeg", "sdk\projects\libjpeg\libjpeg.vcxproj", "{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -105,6 +107,14 @@ Global
 		{9646DBF8-1A5E-41F0-9328-F65910706666}.Verified|x64.Build.0 = Verified|x64
 		{9646DBF8-1A5E-41F0-9328-F65910706666}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
 		{9646DBF8-1A5E-41F0-9328-F65910706666}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.Release|x64.ActiveCfg = Release|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.Release|x64.Build.0 = Release|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.Release-AVX|x64.Build.0 = Release-AVX|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.Verified|x64.ActiveCfg = Verified|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.Verified|x64.Build.0 = Verified|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,6 +129,7 @@ Global
 		{1BF75FEB-87DD-486C-880B-227987D191C2} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{566551F4-4EF1-4CB4-A131-F982E7606907} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{9646DBF8-1A5E-41F0-9328-F65910706666} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
+		{938C5808-85A1-4B5A-8CB4-D2D9D7851CB8} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65834E6F-2007-46A4-A141-FD0BA26E7533}
