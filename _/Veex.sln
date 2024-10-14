@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crypto", "sdk\projects\cryp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dxerr", "sdk\projects\dxerr\dxerr.vcxproj", "{772FE450-F4F3-4687-A2A7-5624825089D7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nvtt", "sdk\projects\nvtt\nvtt.vcxproj", "{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -65,6 +67,14 @@ Global
 		{772FE450-F4F3-4687-A2A7-5624825089D7}.Verified|x64.Build.0 = Verified|x64
 		{772FE450-F4F3-4687-A2A7-5624825089D7}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
 		{772FE450-F4F3-4687-A2A7-5624825089D7}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.Release|x64.ActiveCfg = Release|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.Release|x64.Build.0 = Release|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.Release-AVX|x64.Build.0 = Release-AVX|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.Verified|x64.ActiveCfg = Verified|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.Verified|x64.Build.0 = Verified|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +85,7 @@ Global
 		{3A214E06-B95E-4D61-A291-1F8DF2EC10FD} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{FA169092-EA3E-40C1-8E5A-A2B575700FE8} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{772FE450-F4F3-4687-A2A7-5624825089D7} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
+		{0EB257DC-5CFC-44B0-82C9-CE6B158BE473} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65834E6F-2007-46A4-A141-FD0BA26E7533}
