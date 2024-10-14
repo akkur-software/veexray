@@ -99,7 +99,7 @@ if exist %LJDLLNAME%.manifest^
 if exist luajit.exe.manifest^
   %LJMT% -manifest luajit.exe.manifest -outputresource:luajit.exe
 
-@del *.obj *.pdb *.manifest minilua.exe buildvm.exe
+@del *.obj *.pdb *.log *.manifest minilua.exe buildvm.exe
 @goto :END
 :BAD
 @echo.

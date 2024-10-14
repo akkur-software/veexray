@@ -44,20 +44,27 @@
       if not exist "lua51.lib" (
         call msvcbuild.bat $(PlatformShortName)
       )
+      
+      set INTDIR=$(SolutionDir)x64
       set OUTDIR=$(ProjectDir)
       set LIBDIR=$(VeexLibrariesDir)
+      
       move /Y %OUTDIR%\lua51.lib %LIBDIR%\lua51.lib 
+      rmdir /s /q %INTDIR%
     </NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>
       if not exist "lua51.lib" (
         call msvcbuild.bat $(PlatformShortName)
       )
+      
+      set INTDIR=$(SolutionDir)x64
       set OUTDIR=$(ProjectDir)
       set LIBDIR=$(VeexLibrariesDir)
+      
       move /Y %OUTDIR%\lua51.lib %LIBDIR%\lua51.lib 
+      rmdir /s /q %INTDIR%
     </NMakeReBuildCommandLine>
     <NMakeCleanCommandLine></NMakeCleanCommandLine>
-    <NMakeOutput>lua51.dll</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -71,14 +78,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Verified|x64'">
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
-  <!-- <ItemDefinitionGroup>
-    <PostBuildEvent>
-      <Message>Performing registration</Message>
-      <Command>
-        xcopy "$(ProjectDir)lua51.lib" "$(VeexLibrariesDir)" /S /E /Y
-      </Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup> -->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
