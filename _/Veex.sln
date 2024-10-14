@@ -33,6 +33,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "discord", "sdk\projects\dis
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luajit", "sdk\projects\luajit\src\luajit.vcxproj", "{632AEEB6-DC06-4E15-9551-B2B09A4B73C5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luabind", "sdk\projects\luabind\luabind.vcxproj", "{CC52E0B3-CC35-4934-9302-035B748F3F2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -145,6 +147,14 @@ Global
 		{632AEEB6-DC06-4E15-9551-B2B09A4B73C5}.Verified|x64.Build.0 = Verified|x64
 		{632AEEB6-DC06-4E15-9551-B2B09A4B73C5}.VerifiedDX11|x64.ActiveCfg = Verified|x64
 		{632AEEB6-DC06-4E15-9551-B2B09A4B73C5}.VerifiedDX11|x64.Build.0 = Verified|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.Release|x64.ActiveCfg = Release|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.Release|x64.Build.0 = Release|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.Release-AVX|x64.Build.0 = Release-AVX|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.Verified|x64.ActiveCfg = Verified|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.Verified|x64.Build.0 = Verified|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +173,7 @@ Global
 		{880CD250-BA77-4DAF-A8D4-552F12DD3AE4} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{940CD250-BA77-4D7C-A8D4-552F67DD3AE4} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 		{632AEEB6-DC06-4E15-9551-B2B09A4B73C5} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
+		{CC52E0B3-CC35-4934-9302-035B748F3F2C} = {B85A97F9-8EF3-4887-9572-1EB8E9C46CDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65834E6F-2007-46A4-A141-FD0BA26E7533}
