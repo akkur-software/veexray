@@ -455,7 +455,7 @@
     <ClInclude Include="_vector4.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Veex.Core.rc" />
+    <ResourceCompile Include="xrCore.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

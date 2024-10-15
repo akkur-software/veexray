@@ -37,7 +37,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luabind", "sdk\projects\lua
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua_extensions", "sdk\projects\lua-extensions\lua-extensions.vcxproj", "{44F716E7-05BD-4390-AB02-5F7DAF7FEFDE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Veex.Core", "sources\Veex.Core\Veex.Core.vcxproj", "{A0F7D1FB-59A7-4717-A7E4-96F37E91998E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xrCore", "sources\xrCore\xrCore.vcxproj", "{A0F7D1FB-59A7-4717-A7E4-96F37E91998E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
