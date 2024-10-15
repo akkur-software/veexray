@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="UserMacros">
+    <VeexBinariesDir>$(SolutionDir)binaries\$(Configuration)\</VeexBinariesDir>
+    <VeexIntermDir>$(SolutionDir)intermediate\temp\$(Configuration)\</VeexIntermDir>
+    <VeexLibrariesDir>$(SolutionDir)intermediate\lib\$(Configuration)\</VeexLibrariesDir>
+    <VeexSdkDir>$(SolutionDir)sdk\</VeexSdkDir>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="OutputDirectories">
+    <OutDir Condition="'$(ConfigurationType)'=='Application'"   >$(VeexSdkDir)exec\</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(VeexSdkDir)exec\</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='StaticLibrary'" >$(VeexLibrariesDir)\</OutDir>
+    <IntDir>$(VeexIntermDir)$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>
+        $(VeexSdkDir)include;
+        $(VeexSdkDir)projects;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <UndefinePreprocessorDefinitions>USE_LUAJIT_ONE</UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_VC80_UPGRADE=0x0710;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>
+        $(VeexSdkDir)libraries;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ImportLibrary>$(VeexLibrariesDir)\$(ProjectName).lib</ImportLibrary>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>
+        $(VeexSdkDir)libraries;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+      <OutputFile>$(VeexLibrariesDir)\$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>  
+  
+</Project>
