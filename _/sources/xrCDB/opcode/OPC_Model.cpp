@@ -127,7 +127,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
-#include "stdafx.h"
+#include "../stdafx.h"
 #pragma hdrstop
 
 #include "OPC_TreeBuilders.h"
@@ -175,7 +175,7 @@ OPCODE_Model::~OPCODE_Model()
 }
 
 
-#include "..\xrCore\stream_reader.h"
+#include "../../xrCore/stream_reader.h"
 
 void OPCODE_Model::Load(CStreamReader* stream) {
 	mNoLeaf = stream->r_u32();

@@ -51,5 +51,4 @@ IC void cdelete(T* & ptr)
 	}
 }
 
-#define ENGINE_API
-#include "opcode.h"
+#include "opcode/opcode.h"
