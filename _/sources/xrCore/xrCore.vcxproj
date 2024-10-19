@@ -296,6 +296,7 @@
     <ClCompile Include="NET_utils.cpp" />
     <ClCompile Include="os_clipboard.cpp" />
     <ClCompile Include="ppmd_compressor.cpp" />
+    <ClCompile Include="pure.cpp" />
     <ClCompile Include="rt_compressor.cpp" />
     <ClCompile Include="rt_compressor9.cpp" />
     <ClCompile Include="rt_lzo1x_1.cpp" />
@@ -388,6 +389,7 @@
     <ClInclude Include="PPMd.h" />
     <ClInclude Include="PPMdType.h" />
     <ClInclude Include="ppmd_compressor.h" />
+    <ClInclude Include="pure.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="robin_hood.h" />
     <ClInclude Include="rt_compressor.h" />

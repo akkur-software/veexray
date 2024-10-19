@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xrXMLParser", "sources\xrXM
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xrParticles", "sources\xrParticles\xrParticles.vcxproj", "{94A1C366-3D19-48E6-8170-4ADC2E70DF97}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xrSound", "sources\xrSound\xrSound.vcxproj", "{CCCA7859-EB86-493E-9B53-C4235F45B3C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -215,6 +217,14 @@ Global
 		{94A1C366-3D19-48E6-8170-4ADC2E70DF97}.Verified|x64.Build.0 = Verified|x64
 		{94A1C366-3D19-48E6-8170-4ADC2E70DF97}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
 		{94A1C366-3D19-48E6-8170-4ADC2E70DF97}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.Release|x64.ActiveCfg = Release|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.Release|x64.Build.0 = Release|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.Release-AVX|x64.Build.0 = Release-AVX|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.Verified|x64.ActiveCfg = Verified|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.Verified|x64.Build.0 = Verified|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.VerifiedDX11|x64.ActiveCfg = VerifiedDX11|x64
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5}.VerifiedDX11|x64.Build.0 = VerifiedDX11|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -240,6 +250,7 @@ Global
 		{435BAC9A-B225-457D-AB40-C9BD0CC8838C} = {539036B8-B432-4DDE-9B31-8736356B9D2E}
 		{94A1C366-3D19-48E6-8170-4ADC2E70DF98} = {539036B8-B432-4DDE-9B31-8736356B9D2E}
 		{94A1C366-3D19-48E6-8170-4ADC2E70DF97} = {539036B8-B432-4DDE-9B31-8736356B9D2E}
+		{CCCA7859-EB86-493E-9B53-C4235F45B3C5} = {539036B8-B432-4DDE-9B31-8736356B9D2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65834E6F-2007-46A4-A141-FD0BA26E7533}

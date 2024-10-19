@@ -338,6 +338,14 @@ public:
 	void _destroy();
 };
 
+struct XRCORE_API hdrCFORM
+{
+	u32 version;
+	u32 vertcount;
+	u32 facecount;
+	Fbox aabb;
+};
+
 //Borland class dll interface
 #define _BCL __stdcall
 
