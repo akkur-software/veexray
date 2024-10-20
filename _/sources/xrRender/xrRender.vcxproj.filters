@@ -1,0 +1,1326 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Blender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_bloom_build.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_blur.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_deffer_aref.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_deffer_flat.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_deffer_model.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_dof.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_gasmask_dudv.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_gasmask_drops.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_hdr10_lens_flare.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_hdr10_bloom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_light_occq.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_nightvision.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_lut.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_luminance.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="Blender_Recorder.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_pp_bloom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_ss_sunshafts.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_smaa.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeShader.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="du_sphere_part.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="du_sphere.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="du_cylinder.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="du_cone.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="du_box.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="defines.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10SamplerStateCache.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10r_constants_cache.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10StateCache.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10StateUtils.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10StateManager.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx11MinMaxSMBlender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx11HDAOCSBlender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxPixEventWrapper.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxHashHelper.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ETextureParams.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="HWCaps.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="Light_Render_Direct.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="MbHelpers.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend_hemi.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend_DBG.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend_LOD.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend_tree.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r_constants.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend_xform.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrTheora_Surface_mmx.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrTheora_Stream.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xr_effgamma.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="uber_deffer.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="tss_def.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDescrManager.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SH_Atomic.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_rain.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_hdao.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_R_sun_support.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="Light_Package.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ISpatial_verify.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ISpatial_q_ray.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ISpatial_q_frustum.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ISpatial_q_box.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ISpatial.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="light.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="Light_Render_Direct_ComputeXFS.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="fmesh.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="motion.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonMotions.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="tntQAVI.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrTheora_Surface.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10State.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10BufferUtils.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10TextureUtils.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10ShaderResourceStateCache.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10SH_Texture.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="FBasicVisual.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFont.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="FHierrarhyVisual.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="FLOD.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ttapi.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrCPU_Pipe.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonAnimated.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonRigid.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrSkin2W_SSE.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrSkin2W_thread.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrSkin2W.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="bone.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10HW.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="Envelope.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxRenderDeviceRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="LightTrack.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="light_vis.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="light_GI.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="Light_DB.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxParticleCustom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="PSLibrary.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend_Runtime.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="FTreeVisual.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelPool.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager_Loader.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SH_Matrix.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SH_Constant.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxUIShader.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxUIRender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxDebugRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="xrRender_console.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r__occlusion.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r__pixel_calculator.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r__dsgraph_build.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r__sector.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorMapManager.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="occRasterizer_core.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="occRasterizer.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="HOM.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r__sector_traversal.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r__dsgraph_render.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r__dsgraph_render_lods.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrImage_Resampler.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="tga.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r__screenshot.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEffect.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEffectActions.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEffectDef.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleGroup.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="light_smapvis.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="FProgressive.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxStatGraphRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxUISequenceVideoItem.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxThunderboltDescRender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xr_efflensflare.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxLensFlareRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxObjectSpaceRender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxConsoleRender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxRainRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxApplicationRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxEnvironmentRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dxFontRender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxStatsRender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxWallMarkArray.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxRenderFactory.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dxThunderboltRender.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidBlenders.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidData.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidEmitters.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidGrid.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidObstacles.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidRenderer.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidManager.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx103DFluidVolume.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_loader.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_R_rain.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_R_render.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="IRenderable.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10RainBlender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10MSAABlender.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_light_direct.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_combine.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_ssao.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_light_spot.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_light_reflected.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_light_point.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_light_mask.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="CSCompiler.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="device.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="stats_manager.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="FVisual.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="FSkinned.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DUtils.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_Backend.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10SH_RT.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="R_DStreams.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonCustom.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager_Reset.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrRender_R4.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_direct.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_point.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_omnipart_geom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_reflected.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_point_geom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_spot_geom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_accum_spot.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_draw_rain.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_create_minmaxSM.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_enable_scissor.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_draw_volume.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_accumulator.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_mark_msaa_edges.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_bloom.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_combine.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_hdr10_bloom.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_hdr10_lens_flare.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_luminance.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_PP.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_occq.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_smap_D.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_scene.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_ssao.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_smap_S.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="NvTriStripObjects.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="NvTriStrip.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexCache.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="xrStripify.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailModel.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailManager.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailManager_Decompress.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailManager_soft.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailManager_CACHE.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailManager_VS.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="WallmarksEngine.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletonX.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10ResourceManager_Resources.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+    <ClCompile Include="dx10ResourceManager_Scripting.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="xr_area_raypick.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="xr_area.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="xr_area_query.cpp">
+      <Filter>werr</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Blender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_bloom_build.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_blur.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Blender_CLSID.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_combine.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_deffer_aref.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_deffer_flat.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_deffer_model.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_dof.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_gasmask_dudv.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_gasmask_drops.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_hdr10_lens_flare.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_hdr10_bloom.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_light_mask.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_light_direct.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_light_occq.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_light_spot.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_light_reflected.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_light_point.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_nightvision.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_lut.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_luminance.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Blender_Recorder.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_pp_bloom.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_ssao.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_ss_sunshafts.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="blender_smaa.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="CSCompiler.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeShader.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="du_sphere_part.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="du_sphere.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="du_cylinder.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="du_cone.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="du_box.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawUtils.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="defines.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DUtils.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10SamplerStateCache.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10r_constants_cache.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10State.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10StateUtils.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10StateManager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11MinMaxSMBlender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11HDAOCSBlender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidManager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxPixEventWrapper.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxHashHelper.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DXCommonTypes.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxRenderFactory.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FactoryPtr.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ETextureParams.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FVF.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FontRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FBasicVisual.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFont.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="HWCaps.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Light_Render_Direct.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="MbHelpers.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_Backend_hemi.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_Backend_LOD.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_Backend_tree.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_Backend_xform.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_DStreams.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r_constants_cache.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r_constants.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r2_types.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrTheora_Surface_mmx.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrTheora_Surface.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrTheora_Stream.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xr_effgamma.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrD3DDefs.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrRender_console.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="uber_deffer.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="vis_common.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="WaveForm.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="tntQAVI.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="tss.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="tss_def.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDescrManager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderResourceTraits.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SMAP_Allocator.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SH_RT.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SH_Texture.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SH_Constant.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SH_Atomic.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SH_Matrix.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDeviceRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderFactory.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderVisual.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r4_rendertarget_wallmarks.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r4_R_sun_support.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_light.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="StatsRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="StatGraphRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="WallMarkArray.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="UIShader.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="UISequenceVideoItem.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="UIRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ThunderboltRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ThunderboltDescRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDetailModel.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="RainRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="particles_systems_library_interface.hpp">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleCustom.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectSpaceRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="LensFlareRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Kinematics.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="animation_motion.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugShader.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Light_Package.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Light_DB.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ISpatial.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="LightTrack.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="light_gi.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="Fmesh.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonMotionDefs.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadersExternalData.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="KinematicAnimatedDefs.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="IRenderDetailModel.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="bone.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="motion.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonMotions.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="animation_blend.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10StateCache.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10StateCacheImpl.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10BufferUtils.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10TextureUtils.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10ShaderResourceStateCache.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="KinematicsAnimated.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FHierrarhyVisual.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FLOD.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FVisual.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FProgressive.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ttapi.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrCPU_Pipe.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonAnimated.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonCustom.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="cl_intersect.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonX.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletonXVertRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumerateVertices.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FSkinned.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="envelope.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="FTreeVisual.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxRenderDeviceRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxParticleCustom.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="PSLibrary.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_Backend_Runtime.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="R_Backend.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxUIShader.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxUIRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxDebugRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryHelper.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r__occlusion.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r__pixel_calculator.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r__dsgraph_structure.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r__dsgraph_types.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r__sector.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorMapManager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r4_rendertarget.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="occRasterizer.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrImage_Resampler.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="tga.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEffect.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEffectActions.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEffectDef.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleGroup.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelPool.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="light_smapvis.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxStatGraphRender.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="dxUISequenceVideoItem.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxThunderboltDescRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxThunderboltRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxLensFlareRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xr_efflensflare.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxObjectSpaceRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxConsoleRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxRainRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxApplicationRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxEnvironmentRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxFontRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxStatsRender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dxWallMarkArray.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidBlenders.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidData.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidEmitters.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidGrid.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidObstacles.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidRenderer.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx103DFluidVolume.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10RainBlender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="IRenderable.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10MSAABlender.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="device.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="stats_manager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="HW.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="HOM.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailFormat.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="NvTriStripObjects.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="NvTriStrip.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexCache.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xrStripify.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailModel.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailManager.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r_sun_cascades.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="WallmarksEngine.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="r4.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="dx10R_Backend_Runtime.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+    <ClInclude Include="xr_area.h">
+      <Filter>werr</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="werr">
+      <UniqueIdentifier>{5fcb5444-852a-48dd-97a2-0ecfc318ed76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps">
+      <UniqueIdentifier>{b45babd6-c93b-4422-9cea-414306b93627}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

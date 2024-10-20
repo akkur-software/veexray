@@ -1,5 +1,3 @@
-#ifndef	xrApi_included
-#define xrApi_included
 #pragma once
 
 #ifdef XRAPI_EXPORTS
@@ -43,17 +41,3 @@ extern XRAPI_API IDebugRender*	DRender;
    class IRenderFactory;
     extern ENGINE_API IRenderFactory*	RenderFactory;
 #endif
-/*
-// This class is exported from the xrAPI.dll
-class XRAPI_API CxrAPI {
-public:
-	CxrAPI(void);
-	// TODO: add your methods here.
-};
-
-extern XRAPI_API int nxrAPI;
-
-XRAPI_API int fnxrAPI(void);
-*/
-
-#endif	//	xrApi_included

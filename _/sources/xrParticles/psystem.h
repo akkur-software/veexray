@@ -1,6 +1,5 @@
-#ifndef PSystemH
-#define PSystemH
 #pragma once
+#include "../xrCore/xrCore.h"
 
 #ifdef XR_PARTICLES_EXPORTS
 #define PARTICLES_API
@@ -278,4 +277,3 @@ namespace PAPI
 
 	PARTICLES_API IParticleManager* ParticleManager();
 };
-#endif //PSystemH
