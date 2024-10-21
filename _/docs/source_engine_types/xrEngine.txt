@@ -1,0 +1,2633 @@
+
+struct Flight
+{
+public:
+	u32 type; /* Type of light source */
+	Fcolor diffuse; /* Diffuse color of light */
+	Fcolor specular; /* Specular color of light */
+	Fcolor ambient; /* Ambient color of light */
+	Fvector position; /* Position in world space */
+	Fvector direction; /* Direction in world space */
+	float range; /* Cutoff range */
+	float falloff; /* Falloff */
+	float attenuation0; /* Constant attenuation */
+	float attenuation1; /* Linear attenuation */
+	float attenuation2; /* Quadratic attenuation */
+	float theta; /* Inner angle of spotlight cone */
+	float phi; /* Outer angle of spotlight cone */
+
+	void set(u32 ltType, float x, float y, float z);
+	void mul(float brightness);
+};
+
+struct Fmaterial
+{
+public:
+	Fcolor diffuse; /* Diffuse color RGBA */
+	Fcolor ambient; /* Ambient color RGB */
+	Fcolor specular; /* Specular 'shininess' */
+	Fcolor emissive; /* Emissive color RGB */
+	float power; /* Sharpness if specular highlight */
+
+	void set(float r, float g, float b);
+	void set(float r, float g, float b, float a);
+	void set(Fcolor& c);
+};
+
+struct VDeclarator : public svector<D3DVERTEXELEMENT9, MAXD3DDECLLENGTH + 1>
+{
+	void set(u32 FVF);
+	void set(D3DVERTEXELEMENT9* dcl);
+	void set(const VDeclarator& d);
+	u32 vertex();
+	BOOL equal(VDeclarator& d);
+};
+
+class AchievementManager final {
+public:
+    ~AchievementManager() = default;
+
+    void SetUserAchievement(Snowflake achievementId, std::uint8_t percentComplete, std::function<void(Result)> callback);
+    void FetchUserAchievements(std::function<void(Result)> callback);
+    void CountUserAchievements(std::int32_t* count);
+    Result GetUserAchievement(Snowflake userAchievementId, UserAchievement* userAchievement);
+    Result GetUserAchievementAt(std::int32_t index, UserAchievement* userAchievement);
+    Event<UserAchievement const&> OnUserAchievementUpdate;
+
+private:
+    friend class Core;
+
+    AchievementManager() = default;
+    AchievementManager(AchievementManager const& rhs) = delete;
+    AchievementManager& operator=(AchievementManager const& rhs) = delete;
+    AchievementManager(AchievementManager&& rhs) = delete;
+    AchievementManager& operator=(AchievementManager&& rhs) = delete;
+
+    IDiscordAchievementManager* internal_;
+    static IDiscordAchievementEvents events_;
+};
+
+class ActivityManager final 
+{
+public:
+    ~ActivityManager() = default;
+
+    Result RegisterCommand(char const* command);
+    Result RegisterSteam(std::uint32_t steamId);
+    void UpdateActivity(Activity const& activity, std::function<void(Result)> callback);
+    void ClearActivity(std::function<void(Result)> callback);
+    void SendRequestReply(UserId userId, ActivityJoinRequestReply reply, std::function<void(Result)> callback);
+    void SendInvite(UserId userId, ActivityActionType type, char const* content, std::function<void(Result)> callback);
+    void AcceptInvite(UserId userId, std::function<void(Result)> callback);
+
+    Event<char const*> OnActivityJoin;
+    Event<char const*> OnActivitySpectate;
+    Event<User const&> OnActivityJoinRequest;
+    Event<ActivityActionType, User const&, Activity const&> OnActivityInvite;
+
+private:
+    friend class Core;
+
+    ActivityManager() = default;
+    ActivityManager(ActivityManager const& rhs) = delete;
+    ActivityManager& operator=(ActivityManager const& rhs) = delete;
+    ActivityManager(ActivityManager&& rhs) = delete;
+    ActivityManager& operator=(ActivityManager&& rhs) = delete;
+
+    IDiscordActivityManager* internal_;
+    static IDiscordActivityEvents events_;
+};
+
+class ActivityEvents final 
+{
+public:
+    static void OnActivityJoin(void* callbackData, char const* secret);
+    static void OnActivitySpectate(void* callbackData, char const* secret);
+    static void OnActivityJoinRequest(void* callbackData, DiscordUser* user);
+    static void OnActivityInvite(void* callbackData, EDiscordActivityActionType type, DiscordUser* user, DiscordActivity* activity);
+};
+
+class AchievementEvents final 
+{
+public:
+    static void OnUserAchievementUpdate(void* callbackData, DiscordUserAchievement* userAchievement);
+};
+
+enum ELuaMessageType
+{
+	eLuaMessageTypeInfo = u32(0),
+	eLuaMessageTypeError,
+	eLuaMessageTypeMessage,
+	eLuaMessageTypeHookCall,
+	eLuaMessageTypeHookReturn,
+	eLuaMessageTypeHookLine,
+	eLuaMessageTypeHookCount,
+	eLuaMessageTypeHookTailReturn = u32(-1),
+};
+
+typedef lua_State CLuaVirtualMachine;
+
+struct SMemberCallback
+{
+	luabind::functor<void>* m_lua_function;
+	luabind::object* m_lua_object;
+	shared_str m_method_name;
+};
+
+class ApplicationManager final 
+{
+public:
+    ~ApplicationManager() = default;
+
+    void ValidateOrExit(std::function<void(Result)> callback);
+    void GetCurrentLocale(char locale[128]);
+    void GetCurrentBranch(char branch[4096]);
+    void GetOAuth2Token(std::function<void(Result, OAuth2Token const&)> callback);
+    void GetTicket(std::function<void(Result, char const*)> callback);
+
+private:
+    friend class Core;
+
+    ApplicationManager() = default;
+    ApplicationManager(ApplicationManager const& rhs) = delete;
+    ApplicationManager& operator=(ApplicationManager const& rhs) = delete;
+    ApplicationManager(ApplicationManager&& rhs) = delete;
+    ApplicationManager& operator=(ApplicationManager&& rhs) = delete;
+
+    IDiscordApplicationManager* internal_;
+    static IDiscordApplicationEvents events_;
+};
+
+typedef BoneCallbackFunction* BoneCallback;
+
+class CBoneInstance
+{
+public:
+	BoneCallback callback();
+	void* callback_param();
+	BOOL callback_overwrite();
+	u32 callback_type();  
+	void construct();
+	void set_callback(u32 Type, BoneCallback C, void* Param, BOOL overwrite = FALSE);
+	void reset_callback();
+	void set_callback_overwrite(BOOL v);
+	void set_param(u32 idx, float data);
+	float get_param(u32 idx);
+	u32 mem_usage();
+  
+public:
+	Fmatrix mTransform; // final x-form matrix (local to model)
+	Fmatrix mRenderTransform; // final x-form matrix (model_base -> bone -> model)
+	Fmatrix mRenderTransform_prev; // Prev x-form matrix
+	Fmatrix mRenderTransform_temp; // Temp var
+  float param[MAX_BONE_PARAMS]; //  
+  
+private:
+	BoneCallback Callback;
+	void* Callback_Param;
+	BOOL Callback_overwrite; // performance hint - don't calc anims
+	u32 Callback_type;	
+};
+
+struct vertBoned1W
+{
+	Fvector P;
+	Fvector N;
+	Fvector T;
+	Fvector B;
+	float u, v;
+	u32 matrix;
+	void get_pos(Fvector& p) const;
+  static const u8 bones_count = 1;
+  u16 get_bone_id(u8 bone) const;
+};
+
+struct vertBoned2W
+{
+	u16 matrix0;
+	u16 matrix1;
+	Fvector P;
+	Fvector N;
+	Fvector T;
+	Fvector B;
+	float w;
+	float u, v;
+	void get_pos(Fvector& p) const;
+  static const u8 bones_count = 2;
+  u16 get_bone_id(u8 bone) const;
+};
+
+struct vertBoned3W
+{
+	u16 m[3];
+	Fvector P;
+	Fvector N;
+	Fvector T;
+	Fvector B;
+	float w[2];
+	float u, v;
+	void get_pos(Fvector& p) const;
+  static const u8 bones_count = 3;
+  u16 get_bone_id(u8 bone) const;
+};
+
+struct vertBoned4W
+{
+	u16 m[4];
+	Fvector P;
+	Fvector N;
+	Fvector T;
+	Fvector B;
+	float w[3];
+	float u, v;
+	void get_pos(Fvector& p) const;
+  static const u8 bones_count = 4;
+  u16 get_bone_id(u8 bone) const;
+};
+
+enum EJointType
+{
+	jtRigid,
+	jtCloth,
+	jtJoint,
+	jtWheel,
+	jtNone,
+	jtSlider,
+	jtForceU32 = u32(-1)
+};
+
+struct SJointLimit
+{
+	Fvector2 limit;
+	float spring_factor;
+	float damping_factor;
+  
+	SJointLimit();
+	void Reset();
+};
+
+enum EShapeType
+{
+  stNone,
+  stBox,
+  stSphere,
+  stCylinder,
+  stForceU32 = u16(-1)
+};
+
+enum EShapeFlags
+{
+  sfNoPickable = (1 << 0),
+  sfRemoveAfterBreak = (1 << 1),
+  sfNoPhysics = (1 << 2),
+  sfNoFogCollider = (1 << 3),
+};
+
+struct SBoneShape
+{
+	u16 type; // 2
+	Flags16 flags; // 2
+	Fobb box; // 15*4
+	Fsphere sphere; // 4*4
+	Fcylinder cylinder; // 8*4
+  
+	SBoneShape();
+	void Reset();
+	bool Valid();
+};
+
+struct SJointIKData
+{
+	EJointType type;
+	SJointLimit limits[3];
+	float spring_factor;
+	float damping_factor;
+	Flags32 ik_flags;
+	float break_force;
+	float break_torque;
+	float friction;
+  
+  const u32 flBreakable = (1 << 0);
+
+	SJointIKData();
+	void Reset();
+	void clamp_by_limits(Fvector& dest_xyz);
+	void Export(IWriter& F);
+	bool Import(IReader& F, u16 vers);
+};
+
+class IBoneData
+{
+public:
+
+	virtual IBoneData& _BCL GetChild(u16 id) = 0;
+	virtual const IBoneData& _BCL GetChild(u16 id) const = 0;
+	virtual u16 _BCL GetSelfID() const = 0;
+	virtual u16 _BCL GetNumChildren() const = 0;
+
+	virtual const SJointIKData& _BCL get_IK_data() const = 0;
+	virtual const Fmatrix& _BCL get_bind_transform() const = 0;
+	virtual const SBoneShape& _BCL get_shape() const = 0;
+	virtual const Fobb& _BCL get_obb() const = 0;
+	virtual const Fvector& _BCL get_center_of_mass() const = 0;
+	virtual float _BCL get_mass() const = 0;
+	virtual u16 _BCL get_game_mtl_idx() const = 0;
+	virtual u16 _BCL GetParentID() const = 0;
+	virtual float _BCL lo_limit(u8 k) const = 0;
+	virtual float _BCL hi_limit(u8 k) const = 0;
+};
+
+class CBone :	public CBoneInstance,	public IBoneData
+{
+public:
+	int SelfID;
+	CBone* parent;
+	BoneVec children;
+	Flags8 flags;
+  const u32 flSelected = (1 << 0);
+	SJointIKData IK_data;
+	shared_str game_mtl;
+	SBoneShape shape;
+	float mass;
+	Fvector center_of_mass;
+  
+public:
+	CBone();
+	virtual ~CBone();
+	void SetName(const char* p);
+	void SetParentName(const char* p);
+	void SetWMap(const char* p);
+	void SetRestParams(float length, const Fvector& offset, const Fvector& rotate);
+	shared_str Name();
+	shared_str ParentName();
+	shared_str WMap();
+	CBone* Parent();
+	BOOL IsRoot();
+	shared_str& NameRef();
+
+	const Fvector& _Offset();
+	const Fvector& _Rotate();
+	float _Length();
+	Fmatrix& _RTransform();
+	Fmatrix& _RITransform();
+	Fmatrix& _LRTransform();
+	Fmatrix& _MTransform();
+	Fmatrix& _LTransform();
+	const Fmatrix& _LTransform() const;
+	Fmatrix& _RenderTransform();
+	Fvector& _RestOffset();
+	Fvector& _RestRotate();
+
+	void _Update(const Fvector& T, const Fvector& R);
+	void Reset();
+	void Save(IWriter& F);
+	void Load_0(IReader& F);
+	void Load_1(IReader& F);
+	float _BCL engine_lo_limit(u8 k) const;
+	float _BCL engine_hi_limit(u8 k) const;
+	float _BCL editor_lo_limit(u8 k) const;
+	float _BCL editor_hi_limit(u8 k) const;
+	void SaveData(IWriter& F);
+	void LoadData(IReader& F);
+	void ResetData();
+	void CopyData(CBone* bone);
+
+private:
+	IBoneData& GetChild(u16 id);
+	const IBoneData& GetChild(u16 id) const;
+	u16 GetSelfID() const;
+	u16 GetNumChildren() const;
+	const SJointIKData& get_IK_data() const;
+	const Fmatrix& get_bind_transform() const;
+	const SBoneShape& get_shape() const;
+	const Fobb& get_obb() const;
+	const Fvector& get_center_of_mass() const;
+	float get_mass() const;
+	u16 get_game_mtl_idx() const;
+	u16 GetParentID() const;
+	float lo_limit(u8 k) const;
+	float hi_limit(u8 k) const;
+  
+private:
+	shared_str name;
+	shared_str parent_name;
+	shared_str wmap;
+	Fvector rest_offset;
+	Fvector rest_rotate; // XYZ format (Game format)
+	float rest_length;
+	Fvector mot_offset;
+	Fvector mot_rotate; // XYZ format (Game format)
+	float mot_length;
+	Fmatrix mot_transform;
+	Fmatrix local_rest_transform;
+	Fmatrix rest_transform;
+	Fmatrix rest_i_transform;
+};
+
+typedef xr_vector<CBoneData*> vecBones;
+typedef vecBones::iterator vecBonesIt;
+typedef svector<int, 128> BoneDebug;
+
+class CBoneData :	public IBoneData
+{
+protected:
+	u16 SelfID;
+	u16 ParentID;
+  
+public:
+	shared_str name;
+	Fobb obb;
+	Fmatrix bind_transform;
+	Fmatrix m2b_transform; // model to bone conversion transform
+	SBoneShape shape;
+	shared_str game_mtl_name;
+	u16 game_mtl_idx;
+	SJointIKData IK_data;
+	float mass;
+	Fvector center_of_mass;
+	vecBones children; // bones which are slaves to this
+	DEFINE_VECTOR(u16, FacesVec, FacesVecIt);
+	DEFINE_VECTOR(FacesVec, ChildFacesVec, ChildFacesVecIt);
+	ChildFacesVec child_faces; // shared
+  
+public:
+	CBoneData(u16 ID) : SelfID(ID);
+	virtual ~CBoneData();  
+  void DebugQuery(BoneDebug& L);
+	void SetParentID(u16 id);
+	u16 GetSelfID() const;
+	u16 GetParentID() const;
+	void AppendFace(u16 child_idx, u16 idx);
+	void CalculateM2B(const Fmatrix& Parent);
+  virtual u32 mem_usage();
+  
+private:
+	IBoneData& _BCL GetChild(u16 id);
+	const IBoneData& _BCL GetChild(u16 id) const;
+	u16 _BCL GetNumChildren() const;
+	const SJointIKData& _BCL get_IK_data() const;
+	const Fmatrix& _BCL get_bind_transform() const;
+	const SBoneShape& _BCL get_shape() const;
+	const Fobb& _BCL get_obb() const;
+	const Fvector& _BCL get_center_of_mass() const;
+	float _BCL get_mass() const;
+	u16 _BCL get_game_mtl_idx() const;
+	float _BCL lo_limit(u8 k) const;
+	float _BCL hi_limit(u8 k) const;
+};
+
+enum EBoneCallbackType
+{
+	bctDummy = u32(0),
+	bctPhysics,
+	bctCustom,
+	bctForceU32 = u32(-1),
+};
+
+enum
+{
+  flRelativeLink = (1 << 0),
+  flPositionRigid = (1 << 1),
+  flDirectionRigid = (1 << 2),
+};
+
+class CCameraBase
+{
+protected:
+	CObject* parent;
+
+public:
+	BOOL bClampYaw, bClampPitch, bClampRoll;
+	float yaw, pitch, roll;
+	Flags32 m_Flags;
+	ECameraStyle style;
+	Fvector2 lim_yaw, lim_pitch, lim_roll;
+	Fvector rot_speed;
+	Fvector vPosition;
+	Fvector vDirection;
+	Fvector vNormal;
+	float f_fov;
+	float f_aspect;
+  int tag;
+
+public:
+	Fvector Position() const;
+	Fvector Direction() const;
+	Fvector Up() const;
+	Fvector Right() const;
+	float Fov() const;
+	float Aspect() const;  
+
+	CCameraBase(CObject* p, u32 flags);
+	virtual ~CCameraBase();
+	virtual void Load(LPCSTR section);
+	void SetParent(CObject* p);
+	virtual void OnActivate(CCameraBase* old_cam);
+	virtual void OnDeactivate();
+	virtual void Move(int cmd, float val = 0, float factor = 1.0f);
+	virtual void Update(Fvector& point, Fvector& noise_angle);
+	virtual void Get(Fvector& P, Fvector& D, Fvector& N);
+	virtual void Set(const Fvector& P, const Fvector& D, const Fvector& N);
+	virtual void Set(float Y, float P, float R);
+	virtual float GetWorldYaw();
+	virtual float GetWorldPitch();
+	virtual float CheckLimYaw();
+	virtual float CheckLimPitch();
+	virtual float CheckLimRoll();
+};
+
+structSBaseEffector
+{
+	typedef fastdelegate::FastDelegate0<> CB_ON_B_REMOVE;
+	CB_ON_B_REMOVE m_on_b_remove_callback;
+	virtual ~SBaseEffector();
+};
+
+struct SCamEffectorInfo
+{
+	Fvector p;
+	Fvector d;
+	Fvector n;
+	Fvector r;
+	float fFov;
+	float fFar;
+	float fAspect;
+	bool dont_apply;
+	bool affected_on_hud;
+	SCamEffectorInfo();
+
+	SCamEffectorInfo& operator =(const SCamEffectorInfo& other);
+};
+
+enum ECameraStyle
+{
+	csCamDebug,
+	csFirstEye,
+	csLookAt,
+	csMax,
+	csFixed,
+	cs_forcedword = u32(-1)
+};
+
+enum ECamEffectorType
+{
+	cefDemo = 0,
+	cefNext
+};
+
+enum EEffectorPPType
+{
+	ppeNext = 0,
+};
+
+struct SNoise
+	{
+		float intensity, grain;
+		float fps;
+
+		SNoise();
+		SNoise(float _i, float _g, float _f) : intensity(_i), grain(_g), fps(_f);
+		IC SNoise& set(float _i, float _g, float _f);
+	};
+  
+struct SDuality
+{
+  float h, v;
+
+  SDuality();
+  SDuality(float _h, float _v) : h(_h), v(_v);
+  SDuality& set(float _h, float _v);
+}
+  
+struct SColor
+{
+  float r, g, b;
+
+  SColor();
+  SColor(float _r, float _g, float _b) : r(_r), g(_g), b(_b);
+  operator u32();
+  operator const Fvector&();
+  SColor& operator +=(const SColor& ppi);
+  SColor& operator -=(const SColor& ppi);
+  SColor& set(float _r, float _g, float _b);
+};
+
+struct SPPInfo
+{
+	float blur, gray;
+	SDuality duality;
+  SNoise noise;
+	SColor color_base;
+	SColor color_gray;
+	SColor color_add;
+	float cm_influence;
+	float cm_interpolate;
+	shared_str cm_tex1;
+	shared_str cm_tex2;
+
+	SPPInfo& add(const SPPInfo& ppi);
+	SPPInfo& sub(const SPPInfo& ppi);
+	void normalize();
+	SPPInfo();
+	SPPInfo& lerp(const SPPInfo& def, const SPPInfo& to, float factor);
+	void validate(LPCSTR str);
+};
+
+class CCameraManager
+{  
+public:
+  u32 dbg_upd_frame;
+
+	void Dump();
+	u32 Count() { return m_EffectorsCam.size() + m_EffectorsCam_added_deffered.size(); }
+	CEffectorCam* AddCamEffector(CEffectorCam* ef);
+	CEffectorCam* GetCamEffector(ECamEffectorType type);
+	void RemoveCamEffector(ECamEffectorType type);
+	void RemoveCamEffector(CEffectorCam* ef);
+	ECamEffectorType RequestCamEffectorId();
+	EEffectorPPType RequestPPEffectorId();
+	CEffectorPP* GetPPEffector(EEffectorPPType type);
+	CEffectorPP* AddPPEffector(CEffectorPP* ef);
+	void RemovePPEffector(EEffectorPPType type);
+
+	Fvector Position() const;
+	Fvector Direction() const;
+	Fvector Up() const;
+	Fvector Right() const;
+	float Fov() const;
+	float Aspect() const;
+	void camera_Matrix(Fmatrix& M);
+	void Update(const Fvector& P, const Fvector& D, const Fvector& N, float fFOV_Dest, float fASPECT_Dest,  float fFAR_Dest, u32 flags);
+	void UpdateFromCamera(const CCameraBase* C);
+	void ApplyDevice(float _viewport_near);
+	static void ResetPP();
+  
+	CCameraManager(bool bApplyOnUpdate);
+	virtual ~CCameraManager();
+  
+protected:
+	SCamEffectorInfo m_cam_info;
+	EffectorCamVec m_EffectorsCam;
+	EffectorCamVec m_EffectorsCam_added_deffered;
+	EffectorPPVec m_EffectorsPP;
+	bool m_bAutoApply;
+	SPPInfo pp_affected;
+	void UpdateDeffered();
+
+	virtual void UpdateCamEffectors();
+	virtual void UpdatePPEffectors();
+	virtual bool ProcessCameraEffector(CEffectorCam* eff);
+	void OnEffectorReleased(SBaseEffector* e);  
+};
+
+class CCF_DynamicMesh :	public CCF_Skeleton
+{  
+public:
+	CCF_DynamicMesh(CObject* _owner) : CCF_Skeleton(_owner);
+	virtual BOOL _RayQuery(const collide::ray_defs& Q, collide::rq_results& R);
+  
+private:
+	typedef CCF_Skeleton inherited;
+};
+
+class Core final 
+{
+public:
+    static Result Create(ClientId clientId, std::uint64_t flags, Core** instance);
+    ~Core();
+    Result RunCallbacks();
+    void SetLogHook(LogLevel minLevel, std::function<void(LogLevel, char const*)> hook);
+
+    discord::ApplicationManager& ApplicationManager();
+    discord::UserManager& UserManager();
+    discord::ImageManager& ImageManager();
+    discord::ActivityManager& ActivityManager();
+    discord::RelationshipManager& RelationshipManager();
+    discord::LobbyManager& LobbyManager();
+    discord::NetworkManager& NetworkManager();
+    discord::OverlayManager& OverlayManager();
+    discord::StorageManager& StorageManager();
+    discord::StoreManager& StoreManager();
+    discord::VoiceManager& VoiceManager();
+    discord::AchievementManager& AchievementManager();
+
+private:
+    Core() = default;
+    Core(Core const& rhs) = delete;
+    Core& operator=(Core const& rhs) = delete;
+    Core(Core&& rhs) = delete;
+    Core& operator=(Core&& rhs) = delete;
+
+    IDiscordCore* internal_;
+    Event<LogLevel, char const*> setLogHook_;
+    discord::ApplicationManager applicationManager_;
+    discord::UserManager userManager_;
+    discord::ImageManager imageManager_;
+    discord::ActivityManager activityManager_;
+    discord::RelationshipManager relationshipManager_;
+    discord::LobbyManager lobbyManager_;
+    discord::NetworkManager networkManager_;
+    discord::OverlayManager overlayManager_;
+    discord::StorageManager storageManager_;
+    discord::StoreManager storeManager_;
+    discord::VoiceManager voiceManager_;
+    discord::AchievementManager achievementManager_;
+};
+
+class CCustomHUD : public DLL_Pure, public IEventReceiver,	public pureScreenResolutionChanged
+{
+public:
+	CCustomHUD();
+	virtual ~CCustomHUD();
+
+	virtual void Render_First();
+	virtual void Render_Last();
+	virtual void Render_Actor_Shadow();
+	virtual void OnFrame();
+	virtual void OnEvent(EVENT E, u64 P1, u64 P2);
+	virtual void Load();
+  
+	virtual void OnDisconnected() = 0;
+	virtual void OnConnected() = 0;
+	virtual void RenderActiveItemUI() = 0;
+	virtual bool RenderActiveItemUIQuery() = 0;
+	virtual void net_Relcase(CObject* object) = 0;
+};
+
+enum
+{
+	rsFullscreen = (1ul << 0ul),
+	rsClearBB = (1ul << 1ul),
+	rsVSync = (1ul << 2ul),
+	rsWireframe = (1ul << 3ul),
+	rsOcclusion = (1ul << 4ul),
+	rsStatistic = (1ul << 5ul),
+	rsDetails = (1ul << 6ul),
+	rsRefresh60hz = (1ul << 7ul),
+	rsConstantFPS = (1ul << 8ul),
+	rsDrawStatic = (1ul << 9ul),
+	rsDrawDynamic = (1ul << 10ul),
+	rsDisableObjectsAsCrows = (1ul << 11ul),
+	rsOcclusionDraw = (1ul << 12ul),
+	rsOcclusionStats = (1ul << 13ul),
+	mtSound = (1ul << 14ul),
+	mtPhysics = (1ul << 15ul),
+	mtNetwork = (1ul << 16ul),
+	mtParticles = (1ul << 17ul),
+	rsCameraPos = (1ul << 18ul),
+	rsR2 = (1ul << 19ul),
+	rsR3 = (1ul << 20ul),
+	rsR4 = (1ul << 21ul)
+};
+
+enum
+{
+	rsClearModels = (1 << 0),
+	rsPrecompiledShaders = (1 << 1),
+	rsGrassShadow = (1 << 2),
+	rsNoScale = (1 << 3),
+	rsFxaa = (1 << 4),
+	rsDiscord = (1 << 5),
+	rsKeypress = (1 << 6),
+	rsCODPickup = (1 << 7),
+	rsFeelGrenade = (1 << 8),
+	rsOptShadowGeom = (1 << 9),
+	rsAimSway = (1 << 10),
+	rsAlwaysActive = (1 << 11),
+};
+
+class IRenderDevice
+{
+public:
+	virtual CStatsPhysics* _BCL StatPhysics() = 0;
+	virtual void _BCL AddSeqFrame(pureFrame* f, bool mt) = 0;
+	virtual void _BCL RemoveSeqFrame(pureFrame* f) = 0;
+};
+
+class CRenderDeviceData
+{
+public:
+	u32 dwWidth;
+	u32 dwHeight;
+	u32 dwPrecacheFrame;
+	BOOL b_is_Ready;
+	BOOL b_is_Active;
+	BOOL b_hide_cursor;
+	u32 dwFrame;
+	float fTimeDelta;
+	float fTimeGlobal;
+	u32 dwTimeDelta;
+	u32 dwTimeGlobal;
+	u32 dwTimeContinual;
+	Fvector vCameraPosition;
+	Fvector vCameraDirection;
+	Fvector vCameraTop;
+	Fvector vCameraRight;
+	Fmatrix mView;
+	Fmatrix mProject;
+	Fmatrix mFullTransform;
+	Fvector vCameraPosition_saved;
+	Fmatrix mView_saved;
+	Fmatrix mProject_saved;
+	Fmatrix mFullTransform_saved;
+	float fFOV;
+	float fASPECT;
+	float ViewportNear = 0.2f;
+  
+  CRegistrator<pureRender> seqRender;
+	CRegistrator<pureAppActivate> seqAppActivate;
+	CRegistrator<pureAppDeactivate> seqAppDeactivate;
+	CRegistrator<pureAppStart> seqAppStart;
+	CRegistrator<pureAppEnd> seqAppEnd;
+	CRegistrator<pureFrame> seqFrame;
+	CRegistrator<pureScreenResolutionChanged> seqResolutionChanged;
+	HWND m_hWnd;
+  
+protected:
+	u32 Timer_MM_Delta;
+	CTimer_paused Timer;
+	CTimer_paused TimerGlobal;
+	CTimer frame_timer;
+};
+
+class CRenderDeviceBase : public IRenderDevice, public CRenderDeviceData
+{
+};
+
+class CSecondVPParams
+{
+public:
+  bool isCamReady;
+
+  bool IsSVPActive();
+  void SetSVPActive(bool bState);
+  bool IsSVPFrame();
+  u8 GetSVPFrameDelay();
+  void SetSVPFrameDelay(u8 iDelay);
+
+private:
+  bool isActive;
+  u8 frameDelay;
+};	
+
+class CRenderDevice : public CRenderDeviceBase
+{
+public:  
+	CRenderDevice()	:	m_pRender(0);
+  LRESULT MsgProc(HWND, UINT, WPARAM, LPARAM);	
+	void OnWM_Activate(WPARAM wParam, LPARAM lParam);
+  void SetNearer(BOOL enabled);
+	void DumpResourcesMemoryUsage();
+	void Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason);
+	bool Paused();
+	void PreCache(u32 amount, bool b_draw_loadscreen, bool b_wait_user_input);
+	BOOL Begin();
+	void Clear();
+	void End();
+	void FrameMove();
+	void overdrawBegin();
+	void overdrawEnd();
+	void Screenshot();
+	void DumpFlags();
+	IC CTimer_paused* GetTimerGlobal();
+	u32 TimerAsync();
+	u32 TimerAsync_MMT();
+	void ConnectToRender();
+	void Create(void);
+	void Run(void);
+	void Destroy(void);
+	void Reset(bool precache = true);
+	void Initialize(void);
+	void ShutDown(void);
+	void time_factor(const float& time_factor);
+	const float& time_factor() const;
+  void remove_from_seq_parallel(const fastdelegate::FastDelegate0<>& delegate);
+	u32 frame_elapsed();
+  void xr_stdcall on_idle();
+	bool xr_stdcall on_message(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result);
+
+public:
+	xrCriticalSection mt_csEnter;
+	xrCriticalSection mt_csLeave;
+	volatile BOOL mt_bMustExit;	
+  CRegistrator<pureFrame> seqFrameMT;
+	CRegistrator<pureDeviceReset> seqDeviceReset;
+	xr_vector<fastdelegate::FastDelegate0<>> seqParallel;
+	CStats* Statistic;
+	Fmatrix mInvFullTransform;
+	CSecondVPParams m_SecondViewport;
+  u32 dwPrecacheTotal;
+	float fWidth_2, fHeight_2;
+  IRenderDeviceRender* m_pRender;
+	BOOL m_bNearer;
+
+private:
+	void message_loop();
+	virtual void _BCL AddSeqFrame(pureFrame* f, bool mt);
+	virtual void _BCL RemoveSeqFrame(pureFrame* f);
+	virtual CStatsPhysics* _BCL StatPhysics();
+  void _Create(LPCSTR shName);
+	void _Destroy(BOOL bKeepTextures);
+	void _SetupStates();
+  
+private:
+	u32 m_dwWindowStyle;
+	RECT m_rcWindowBounds;
+	RECT m_rcWindowClient;
+	CTimer TimerMM; 
+};
+
+typedef fastdelegate::FastDelegate0<bool> LOADING_EVENT;
+
+class CLoadScreenRenderer : public pureRender
+{
+public:
+	CLoadScreenRenderer();
+	void start(bool b_user_input);
+	void stop();
+	virtual void OnRender();
+
+	bool b_registered;
+	bool b_need_user_input;
+};
+
+static struct _DF
+{
+	char* name;
+	u32 mask;
+} DF[] =
+{
+	{"rsClearBB", rsClearBB},
+	{"rsVSync", rsVSync},
+	{"rsWireframe", rsWireframe},
+	{NULL, 0}
+};
+
+class base
+{
+public:
+	base();
+	virtual ~base();
+	void on_assign(base* const prev_action);
+	virtual void on_key_press(line_edit_control* const control);
+
+protected:
+	base* m_previous_action;
+};
+
+class callback_base : public base
+{
+private:
+	typedef fastdelegate::FastDelegate0<void> Callback;
+
+public:
+	callback_base(Callback const& callback, key_state state);
+	virtual ~callback_base();
+	virtual void on_key_press(line_edit_control* const control);
+
+protected:
+	key_state m_run_state;
+	Callback m_callback;
+};
+
+class type_pair : public base
+{
+public:
+	type_pair(u32 dik, char c, char c_shift, bool b_translate);
+	virtual ~type_pair();
+	void init(u32 dik, char c, char c_shift, bool b_translate);
+	virtual void on_key_press(line_edit_control* const control);
+
+private:
+	u32 m_dik;
+	bool m_translate;
+	char m_char;
+	char m_char_shift;
+};
+
+class key_state_base : public base
+{
+public:
+	key_state_base(key_state state, base* type_pair);
+	virtual ~key_state_base();
+	virtual void on_key_press(line_edit_control* const control);
+
+private:
+	key_state m_state;
+	base* m_type_pair;
+};
+
+class CEffectorCam : public SBaseEffector
+{
+public:
+	CEffectorCam(ECamEffectorType type, float tm);
+	CEffectorCam();
+	virtual ~CEffectorCam();
+	void SetType(ECamEffectorType type);
+	void SetHudAffect(bool val);
+	bool GetHudAffect();
+	ECamEffectorType GetType();
+	virtual BOOL Valid();
+	virtual BOOL ProcessCam(SCamEffectorInfo& info);
+	virtual void ProcessIfInvalid(SCamEffectorInfo& info);
+	virtual BOOL AllowProcessingIfInvalid();
+	virtual bool AbsolutePositioning();
+  
+protected:
+	ECamEffectorType eType;
+	friend class CCameraManager;
+	float fLifeTime;
+	bool bHudAffect;  
+};
+
+class CEffectorPP : public SBaseEffector
+{  
+public:
+	CEffectorPP(EEffectorPPType type, f32 lifeTime, bool free_on_remove = true);
+	CEffectorPP() : bFreeOnRemove(true), fLifeTime(0.0f), bOverlap(true);
+	virtual ~CEffectorPP();
+	virtual BOOL Process(SPPInfo& PPInfo);
+	virtual BOOL Valid();
+	EEffectorPPType Type() const;
+	bool FreeOnRemove() const;
+	void SetType(EEffectorPPType t);
+	virtual void Stop(float speed);
+
+public:
+	bool bOverlap;
+  
+protected:
+	float fLifeTime;
+  
+private:
+	EEffectorPPType eType;
+	bool bFreeOnRemove;
+};
+
+class CEngine
+{  
+public:
+	CEngineAPI External;
+	CEventAPI Event;
+	CSheduler Sheduler;
+
+	void Initialize();
+	void Destroy();
+	CEngine();
+	~CEngine();
+  
+private:
+	HMODULE hPSGP;
+};
+
+class DLL_Pure
+{
+public:
+	CLASS_ID CLS_ID;
+
+	DLL_Pure(void* params);
+	DLL_Pure();
+  
+	virtual DLL_Pure* _construct();
+	virtual ~DLL_Pure();
+};
+
+class CEngineAPI
+{  
+public:
+	BENCH_SEC_SCRAMBLEMEMBER1
+	Factory_Create* pCreate;
+	Factory_Destroy* pDestroy;
+	BOOL tune_enabled;
+	VTPause* tune_pause;
+	VTResume* tune_resume;
+	void Initialize();
+	void InitializeNotDedicated();
+	void Destroy();
+	void CreateRendererList();
+
+	CEngineAPI();
+	~CEngineAPI();
+  
+private:
+	HMODULE hTuner;
+};
+
+struct SEnumVerticesCallback
+{
+	virtual void operator ()(const Fvector& p) = 0;
+};
+
+struct st_Key
+{
+  const u32 ktStepped = 1 << 0;
+	float value;
+	float time;
+	u8 shape;
+	float tension;
+	float continuity;
+	float bias;
+	float param[4];
+
+	st_Key();
+	bool equal(const st_Key& tgt);
+	void Save(IWriter& F);
+	void Load_1(IReader& F);
+	void Load_2(IReader& F);
+};
+
+class CEnvelope
+{
+public:
+	KeyVec keys;
+	int behavior[2];
+  
+public:
+	CEnvelope();
+	CEnvelope(CEnvelope* source);
+	virtual ~CEnvelope();
+	float Evaluate(float t);
+	void Clear();
+	void ClearAndFree();
+	void Save(IWriter& F);
+	void Load_1(IReader& F);
+	void Load_2(IReader& F);
+	void SaveA(IWriter& F);
+	void LoadA(IReader& F);
+	void RotateKeys(float angle);
+	KeyIt FindKey(float t, float eps);
+	void FindNearestKey(float t, KeyIt& min, KeyIt& max, float eps);
+	void InsertKey(float t, float val);
+	void DeleteKey(float t);
+	BOOL ScaleKeys(float from_time, float to_time, float scale_factor, float eps);
+	float GetLength(float* mn, float* mx);
+	void Optimize();
+};
+
+class CEnvModifier
+{
+public:
+	Fvector3 position;
+	float radius;
+	float power;
+	float far_plane;
+	Fvector3 fog_color;
+	float fog_density;
+	Fvector3 ambient;
+	Fvector3 sky_color;
+	Fvector3 hemi_color;
+	Flags16 use_flags;
+
+	void load(IReader* fs, u32 version);
+	float sum(CEnvModifier& _another, Fvector3& view);
+};
+
+struct SSndChannel
+{
+public:
+  shared_str m_load_section;
+  Fvector2 m_sound_dist;
+  Ivector4 m_sound_period;
+  typedef xr_vector<ref_sound> sounds_type;
+
+  void load(CInifile& config, LPCSTR sect);
+  ref_sound& get_rnd_sound();
+  u32 get_rnd_sound_time();
+  u32 get_rnd_sound_first_time();
+  float get_rnd_sound_dist();
+  ~SSndChannel();
+  inline sounds_type& sounds();
+
+protected:
+  xr_vector<ref_sound> m_sounds;
+};
+
+struct SEffect
+{
+  u32 life_time;
+  ref_sound sound;
+  shared_str particles;
+  Fvector offset;
+  float wind_gust_factor;
+  float wind_blast_in_time;
+  float wind_blast_out_time;
+  float wind_blast_strength;
+  Fvector wind_blast_direction;
+
+  ~SEffect();
+};
+
+class CEnvAmbient
+{
+public:
+	DEFINE_VECTOR(SEffect*, EffectVec, EffectVecIt);
+	DEFINE_VECTOR(SSndChannel*, SSndChannelVec, SSndChannelVecIt);
+
+public:
+	const shared_str& name();
+	const shared_str& get_ambients_config_filename();
+
+	void load(CInifile& ambients_config, CInifile& sound_channels_config,	CInifile& effects_config,	const shared_str& section);
+	IC SEffect* get_rnd_effect();
+	IC u32 get_rnd_effect_time();
+
+	SEffect* create_effect(CInifile& config, LPCSTR id);
+	SSndChannel* create_sound_channel(CInifile& config, LPCSTR id);
+	~CEnvAmbient();
+  
+	void destroy();
+	inline EffectVec& effects();
+	inline SSndChannelVec& get_snd_channels();
+  
+protected:
+	shared_str m_load_section;
+	EffectVec m_effects;
+	Ivector2 m_effect_period;
+	SSndChannelVec m_sound_channels;
+	shared_str m_ambients_config_filename;
+};
+
+class CEnvDescriptor
+{
+public:
+	float exec_time;
+	float exec_time_loaded;
+	shared_str sky_texture_name;
+	shared_str sky_texture_env_name;
+	shared_str clouds_texture_name;
+	FactoryPtr<IEnvDescriptorRender> m_pDescriptor;
+	Fvector4 clouds_color;
+	Fvector3 sky_color;
+	float sky_rotation;
+	float far_plane;
+	Fvector3 fog_color;
+	float fog_density;
+	float fog_distance;
+	float rain_density;
+	Fvector3 rain_color;
+	float bolt_period;
+	float bolt_duration;
+	float wind_velocity;
+	float wind_direction;
+	float volumetric_intensity_factor;
+	float volumetric_distance_factor;
+	Fvector3 ambient;
+	Fvector4 hemi_color;
+	Fvector3 sun_color;
+	Fvector3 sun_dir;
+	float m_fSunShaftsIntensity;
+	float m_fWaterIntensity;
+	float m_fHemiVibrance;
+	float m_fHemiContrast;
+	float m_fWetSurfaces;
+	float m_fTreeAmplitudeIntensity;
+	shared_str lens_flare_id;
+	shared_str tb_id;
+	CEnvAmbient* env_ambient;
+  shared_str m_identifier;
+
+public:
+	CEnvDescriptor(shared_str const& identifier);
+	void load(CEnvironment& environment, CInifile& config);
+	void copy(const CEnvDescriptor& src);
+	void on_device_create();
+	void on_device_destroy();	
+};
+
+class CEnvDescriptorMixer : public CEnvDescriptor
+{
+public:
+	FactoryPtr<IEnvDescriptorMixerRender> m_pDescriptorMixer;
+	float weight;
+	float fog_near;
+	float fog_far;
+  
+public:
+	CEnvDescriptorMixer(shared_str const& identifier);
+	INGAME_EDITOR_VIRTUAL void lerp(CEnvironment* parent, CEnvDescriptor& A, CEnvDescriptor& B, float f, CEnvModifier& M, float m_power);
+	void boost(CEnvironment* env);
+	void clear();
+	void destroy();
+};
+
+struct str_pred : public std::binary_function<shared_str, shared_str, bool>
+{
+  bool operator()(const shared_str& x, const shared_str& y) const;
+};
+
+class CEnvironment
+{
+public:
+	FactoryPtr<IEnvironmentRender> m_pRender;
+	BOOL bNeed_re_create_env;
+	float wind_strength_factor;
+	float wind_gust_factor;
+	float wetness_factor;
+	Fvector4 wind_anim;
+	float wind_blast_strength;
+	Fvector wind_blast_direction;
+	Fquaternion wind_blast_start_time;
+	Fquaternion wind_blast_stop_time;
+	float wind_blast_strength_start_value;
+	float wind_blast_strength_stop_value;
+	Fquaternion wind_blast_current;
+	CEnvDescriptorMixer* CurrentEnv;
+	CEnvDescriptor* Current[2];
+	bool bWFX;
+	float wfx_time;
+	CEnvDescriptor* WFX_end_desc[2];
+	EnvVec* CurrentWeather;
+	shared_str CurrentWeatherName;
+	shared_str CurrentCycleName;
+	EnvsMap WeatherCycles;
+	EnvsMap WeatherFXs;
+	xr_vector<CEnvModifier> Modifiers;
+	EnvAmbVec Ambients;
+	CEffect_Rain* eff_Rain;
+	CLensFlare* eff_LensFlare;
+	CEffect_Thunderbolt* eff_Thunderbolt;
+	float fTimeFactor;
+  DEFINE_VECTOR(CEnvAmbient*, EnvAmbVec, EnvAmbVecIt);
+	DEFINE_VECTOR(CEnvDescriptor*, EnvVec, EnvIt);
+	DEFINE_MAP_PRED(shared_str, EnvVec, EnvsMap, EnvsMapIt, str_pred);
+  CInifile* m_ambients_config;
+	CInifile* m_sound_channels_config;
+	CInifile* m_effects_config;
+	CInifile* m_suns_config;
+	CInifile* m_sun_pos_config;
+	CInifile* m_thunderbolt_collections_config;
+	CInifile* m_thunderbolts_config;
+  float p_var_alt;
+	float p_var_long;
+	float p_min_dist;
+	float p_tilt;
+	float p_second_prop;
+	float p_sky_color;
+	float p_sun_color;
+	float p_fog_color;
+  
+public:
+	void SelectEnvs(float gt);
+	void UpdateAmbient();
+	CEnvAmbient* AppendEnvAmb(const shared_str& sect);
+	void Invalidate();
+	CEnvironment();
+	~CEnvironment();
+	void load();
+	void unload();
+	void Reload();
+	void mods_load();
+	void mods_unload();
+	void OnFrame();
+	void lerp(float& current_weight);
+	void RenderSky();
+	void RenderClouds();
+	void RenderFlares();
+	void RenderLast();
+	bool SetWeatherFX(shared_str name);
+	bool StartWeatherFXFromTime(shared_str name, float time);
+	bool IsWFXPlaying();
+	void StopWFX();
+	void SetWeather(shared_str name, bool forced = false);
+	shared_str GetWeather();
+	void ChangeGameTime(float game_time);
+	void SetGameTime(float game_time, float time_factor);
+	void OnDeviceCreate();
+	void OnDeviceDestroy();
+  static bool sort_env_pred(const CEnvDescriptor* x, const CEnvDescriptor* y);
+	static bool sort_env_etl_pred(const CEnvDescriptor* x, const CEnvDescriptor* y);
+  SThunderboltDesc* thunderbolt_description(CInifile& config, shared_str const& section);
+	SThunderboltCollection* thunderbolt_collection(CInifile* pIni, CInifile* thunderbolts, LPCSTR section);
+	SThunderboltCollection* thunderbolt_collection(xr_vector<SThunderboltCollection*>& collection, shared_str const& id);
+	CLensFlareDescriptor* add_flare(xr_vector<CLensFlareDescriptor*>& collection, shared_str const& id);	
+
+protected:
+	CEnvDescriptor* create_descriptor(shared_str const& identifier, CInifile* config);
+	void load_sun();
+	void load_weathers();
+	void load_weather_effects();
+	void create_mixer();
+	void destroy_mixer();
+	void load_level_specific_ambients();
+
+protected:
+	CPerlinNoise1D* PerlinNoise1D;
+	float fGameTime;
+  
+private:
+	friend class dxEnvironmentRender;	
+  FvectorVec CloudsVerts;
+	U16Vec CloudsIndices;
+
+private:
+	float NormalizeTime(float tm);
+	float TimeDiff(float prev, float cur);
+	float TimeWeight(float val, float min_t, float max_t);
+	void SelectEnvs(EnvVec* envs, CEnvDescriptor*& e0, CEnvDescriptor*& e1, float tm);
+	void SelectEnv(EnvVec* envs, CEnvDescriptor*& e, float tm);
+	void calculate_dynamic_sun_dir();
+	void calculate_config_sun_dir();
+};
+
+struct Slot 
+{
+  Token token;
+  std::function<void(Args...)> fn;
+};
+
+template <typename... Args>
+class Event final 
+{
+public:
+    using Token = int;
+
+    Event();
+    Event(Event const&) = default;
+    Event(Event&&) = default;
+    ~Event() = default;
+    Event& operator=(Event const&) = default;
+    Event& operator=(Event&&) = default;
+
+    template <typename EventHandler>
+    Token Connect(EventHandler slot);
+    void Disconnect(Token token);
+    void DisconnectAll();
+    void operator()(Args... args);
+
+private:
+    Token nextToken_{};
+    std::vector<Slot> slots_{};
+};
+
+typedef CEvent* EVENT;
+
+class IEventReceiver
+{
+public:
+	virtual void OnEvent(EVENT E, u64 P1, u64 P2) = 0;
+};
+
+struct Deferred
+{
+  EVENT E;
+  u64 P1;
+  u64 P2;
+};
+
+class CEventAPI
+{  
+public:
+	EVENT Create(const char* N);
+	void Destroy(EVENT& E);
+	EVENT Handler_Attach(const char* N, IEventReceiver* H);
+	void Handler_Detach(EVENT& E, IEventReceiver* H);
+	void Signal(EVENT E, u64 P1 = 0, u64 P2 = 0);
+	void Signal(LPCSTR E, u64 P1 = 0, u64 P2 = 0);
+	void Defer(EVENT E, u64 P1 = 0, u64 P2 = 0);
+	void Defer(LPCSTR E, u64 P1 = 0, u64 P2 = 0);
+	void OnFrame();
+	void Dump();
+	BOOL Peek(LPCSTR EName);
+	void _destroy();
+  
+private:
+	xr_vector<EVENT> Events;
+	xr_vector<Deferred> Events_Deferred;
+	xrCriticalSection CS;
+};
+
+class CDemoPlay : public CEffectorCam
+{  
+public:
+	virtual BOOL ProcessCam(SCamEffectorInfo& info);
+	CDemoPlay(const char* name, float ms, u32 cycles, float life_time = 60 * 60 * 1000);
+	virtual ~CDemoPlay();
+  
+private:
+	COMotion* m_pMotion;
+	SAnimParams* m_MParam;
+	xr_vector<Fmatrix> seq;
+	int m_count;
+	float fStartTime;
+	float fSpeed;
+	u32 dwCyclesLeft;
+	BOOL stat_started;
+	CTimer stat_Timer_frame;
+	CTimer stat_Timer_total;
+	u32 stat_StartFrame;
+	xr_vector<float> stat_table;
+
+private:
+	void stat_Start();
+	void stat_Stop();
+};
+
+struct force_position
+{
+  bool set_position;
+  Fvector p;
+}
+
+struct force_direction
+{
+  bool set_direction;
+  Fvector d;
+}
+
+class CDemoRecord : public CEffectorCam, public IInputReceiver,	public pureRender
+{
+public:
+	CDemoRecord(const char* name, float life_time = 60 * 60 * 1000, BOOL return_ctrl_inputs = 0);
+	CDemoRecord(const char* name, xr_unordered_set<CDemoRecord*>* pDemoRecords, BOOL isInputBlocked = 0, float life_time = 60 * 60 * 1000, BOOL return_ctrl_inputs = 0);
+	virtual ~CDemoRecord();
+
+	virtual void IR_OnKeyboardPress(int dik);
+	virtual void IR_OnKeyboardRelease(int dik);
+	virtual void IR_OnKeyboardHold(int dik);
+	virtual void IR_OnMouseMove(int dx, int dy);
+	virtual void IR_OnMouseHold(int btn);
+	virtual void IR_OnMousePress(int btn);
+	virtual void IR_OnMouseRelease(int btn);
+	void StopDemo();
+	void EnableReturnCtrlInputs();
+	void SetCameraBoundary(float boundary);
+	virtual BOOL ProcessCam(SCamEffectorInfo& info);
+	static void SetGlobalPosition(const Fvector& p);
+	static void GetGlobalPosition(Fvector& p);
+	static void SetGlobalDirection(const Fvector& d);
+	static void GetGlobalDirection(Fvector& d);
+	BOOL m_b_redirect_input_to_level;
+	virtual void OnRender();
+  
+private:
+	force_position g_position;
+  force_direction g_direction;
+	int iCount;
+	IWriter* file;
+	Fvector m_HPB;
+	Fvector m_Position;
+	Fvector m_Actor_Position;
+	Fvector m_Starting_Position;
+	Fmatrix m_Camera;
+	u32 m_Stage;
+	Fvector m_vT;
+	Fvector m_vR;
+	Fvector m_vVelocity;
+	Fvector m_vAngularVelocity;
+	BOOL m_bMakeCubeMap;
+	BOOL m_bMakeScreenshot;
+	int m_iLMScreenshotFragment;
+	BOOL m_bMakeLevelMap;
+	BOOL return_ctrl_inputs;
+	BOOL m_CameraBoundaryEnabled;
+	float m_fSpeed0;
+	float m_fSpeed1;
+	float m_fSpeed2;
+	float m_fSpeed3;
+	float m_fAngSpeed0;
+	float m_fAngSpeed1;
+	float m_fAngSpeed2;
+	float m_fAngSpeed3;
+	float m_fCameraBoundary;
+	float m_fGroundPosition;
+	BOOL isInputBlocked;
+	xr_unordered_set<CDemoRecord*>* pDemoRecords;
+
+private:
+	void MakeCubeMapFace(Fvector& D, Fvector& N);
+	void MakeLevelMapProcess();
+	void MakeScreenshotFace();
+	void RecordKey();
+	void MakeCubemap();
+	void MakeScreenshot();
+	void MakeLevelMapScreenshot(BOOL bHQ);
+};
+
+class Sound
+{
+public:
+	virtual void feel_sound_new(CObject* who, int type, CSound_UserDataPtr user_data, const Fvector& Position, float power);
+};
+
+struct DenyTouch
+{
+  CObject* O;
+  DWORD Expire;
+};
+
+class Touch : private pure_relcase
+{
+public:
+	xr_vector<CObject*> feel_touch;
+	xr_vector<CObject*> q_nearest;
+
+public:
+	void __stdcall feel_touch_relcase(CObject* O);
+	Touch();
+	virtual ~Touch();
+	virtual bool feel_touch_contact(CObject* O);
+	virtual void feel_touch_update(Fvector& P, float R);
+	virtual void feel_touch_deny(CObject* O, DWORD T);
+	virtual void feel_touch_new(CObject* O);
+	virtual void feel_touch_delete(CObject* O);
+  
+protected:
+	xr_vector<DenyTouch> feel_touch_disable;
+};
+
+struct feel_visible_Item
+{
+  collide::ray_cache Cache;
+  Fvector cp_LP;
+  Fvector cp_LR_src;
+  Fvector cp_LR_dst;
+  Fvector cp_LAST; // last point found to be visible
+  CObject* O;
+  float fuzzy; // note range: (-1[no]..1[yes])
+  float Cache_vis;
+  u16 bone_id;
+};
+
+class Vision : private pure_relcase
+{  
+public:
+	Vision(CObject const* owner);
+	virtual ~Vision();
+	xr_vector<feel_visible_Item> feel_visible;
+  
+public:
+	void feel_vision_clear();
+	void feel_vision_query(Fmatrix& mFull, Fvector& P);
+	void feel_vision_update(CObject* parent, Fvector& P, float dt, float vis_threshold);
+	void __stdcall feel_vision_relcase(CObject* object);
+	void feel_vision_get(xr_vector<CObject*>& R);
+	Fvector feel_vision_get_vispoint(CObject* _O);
+	virtual bool feel_vision_isRelevant(CObject* O) = 0;
+	virtual float feel_vision_mtl_transp(CObject* O, u32 element) = 0;
+  
+private:
+	xr_vector<CObject*> seen;
+	xr_vector<CObject*> query;
+	xr_vector<CObject*> diff;
+	collide::rq_results RQR;
+	xr_vector<ISpatial*> r_spatial;
+	CObject const* m_owner;
+
+private:
+	void o_new(CObject* E);
+	void o_delete(CObject* E);
+	void o_trace(Fvector& P, float dt, float vis_threshold);
+};
+
+enum EDiscordResult 
+{
+    DiscordResult_Ok = 0,
+    DiscordResult_ServiceUnavailable = 1,
+    DiscordResult_InvalidVersion = 2,
+    DiscordResult_LockFailed = 3,
+    DiscordResult_InternalError = 4,
+    DiscordResult_InvalidPayload = 5,
+    DiscordResult_InvalidCommand = 6,
+    DiscordResult_InvalidPermissions = 7,
+    DiscordResult_NotFetched = 8,
+    DiscordResult_NotFound = 9,
+    DiscordResult_Conflict = 10,
+    DiscordResult_InvalidSecret = 11,
+    DiscordResult_InvalidJoinSecret = 12,
+    DiscordResult_NoEligibleActivity = 13,
+    DiscordResult_InvalidInvite = 14,
+    DiscordResult_NotAuthenticated = 15,
+    DiscordResult_InvalidAccessToken = 16,
+    DiscordResult_ApplicationMismatch = 17,
+    DiscordResult_InvalidDataUrl = 18,
+    DiscordResult_InvalidBase64 = 19,
+    DiscordResult_NotFiltered = 20,
+    DiscordResult_LobbyFull = 21,
+    DiscordResult_InvalidLobbySecret = 22,
+    DiscordResult_InvalidFilename = 23,
+    DiscordResult_InvalidFileSize = 24,
+    DiscordResult_InvalidEntitlement = 25,
+    DiscordResult_NotInstalled = 26,
+    DiscordResult_NotRunning = 27,
+    DiscordResult_InsufficientBuffer = 28,
+    DiscordResult_PurchaseCanceled = 29,
+    DiscordResult_InvalidGuild = 30,
+    DiscordResult_InvalidEvent = 31,
+    DiscordResult_InvalidChannel = 32,
+    DiscordResult_InvalidOrigin = 33,
+    DiscordResult_RateLimited = 34,
+    DiscordResult_OAuth2Error = 35,
+    DiscordResult_SelectChannelTimeout = 36,
+    DiscordResult_GetGuildTimeout = 37,
+    DiscordResult_SelectVoiceForceRequired = 38,
+    DiscordResult_CaptureShortcutAlreadyListening = 39,
+    DiscordResult_UnauthorizedForAchievement = 40,
+    DiscordResult_InvalidGiftCode = 41,
+    DiscordResult_PurchaseError = 42,
+    DiscordResult_TransactionAborted = 43,
+    DiscordResult_DrawingInitFailed = 44,
+};
+
+enum EDiscordCreateFlags 
+{
+    DiscordCreateFlags_Default = 0,
+    DiscordCreateFlags_NoRequireDiscord = 1,
+};
+
+enum EDiscordLogLevel 
+{
+    DiscordLogLevel_Error = 1,
+    DiscordLogLevel_Warn,
+    DiscordLogLevel_Info,
+    DiscordLogLevel_Debug,
+};
+
+enum EDiscordUserFlag 
+{
+    DiscordUserFlag_Partner = 2,
+    DiscordUserFlag_HypeSquadEvents = 4,
+    DiscordUserFlag_HypeSquadHouse1 = 64,
+    DiscordUserFlag_HypeSquadHouse2 = 128,
+    DiscordUserFlag_HypeSquadHouse3 = 256,
+};
+
+enum EDiscordPremiumType 
+{
+    DiscordPremiumType_None = 0,
+    DiscordPremiumType_Tier1 = 1,
+    DiscordPremiumType_Tier2 = 2,
+};
+
+enum EDiscordImageType 
+{
+    DiscordImageType_User,
+};
+
+enum EDiscordActivityType 
+{
+    DiscordActivityType_Playing,
+    DiscordActivityType_Streaming,
+    DiscordActivityType_Listening,
+    DiscordActivityType_Watching,
+};
+
+enum EDiscordActivityActionType 
+{
+    DiscordActivityActionType_Join = 1,
+    DiscordActivityActionType_Spectate,
+};
+
+enum EDiscordActivityJoinRequestReply 
+{
+    DiscordActivityJoinRequestReply_No,
+    DiscordActivityJoinRequestReply_Yes,
+    DiscordActivityJoinRequestReply_Ignore,
+};
+
+enum EDiscordStatus 
+{
+    DiscordStatus_Offline = 0,
+    DiscordStatus_Online = 1,
+    DiscordStatus_Idle = 2,
+    DiscordStatus_DoNotDisturb = 3,
+};
+
+enum EDiscordRelationshipType 
+{
+    DiscordRelationshipType_None,
+    DiscordRelationshipType_Friend,
+    DiscordRelationshipType_Blocked,
+    DiscordRelationshipType_PendingIncoming,
+    DiscordRelationshipType_PendingOutgoing,
+    DiscordRelationshipType_Implicit,
+};
+
+enum EDiscordLobbyType 
+{
+    DiscordLobbyType_Private = 1,
+    DiscordLobbyType_Public,
+};
+
+enum EDiscordLobbySearchComparison 
+{
+    DiscordLobbySearchComparison_LessThanOrEqual = -2,
+    DiscordLobbySearchComparison_LessThan,
+    DiscordLobbySearchComparison_Equal,
+    DiscordLobbySearchComparison_GreaterThan,
+    DiscordLobbySearchComparison_GreaterThanOrEqual,
+    DiscordLobbySearchComparison_NotEqual,
+};
+
+enum EDiscordLobbySearchCast 
+{
+    DiscordLobbySearchCast_String = 1,
+    DiscordLobbySearchCast_Number,
+};
+
+enum EDiscordLobbySearchDistance 
+{
+    DiscordLobbySearchDistance_Local,
+    DiscordLobbySearchDistance_Default,
+    DiscordLobbySearchDistance_Extended,
+    DiscordLobbySearchDistance_Global,
+};
+
+enum EDiscordKeyVariant 
+{
+    DiscordKeyVariant_Normal,
+    DiscordKeyVariant_Right,
+    DiscordKeyVariant_Left,
+};
+
+enum EDiscordMouseButton 
+{
+    DiscordMouseButton_Left,
+    DiscordMouseButton_Middle,
+    DiscordMouseButton_Right,
+};
+
+enum EDiscordEntitlementType 
+{
+    DiscordEntitlementType_Purchase = 1,
+    DiscordEntitlementType_PremiumSubscription,
+    DiscordEntitlementType_DeveloperGift,
+    DiscordEntitlementType_TestModePurchase,
+    DiscordEntitlementType_FreePurchase,
+    DiscordEntitlementType_UserGift,
+    DiscordEntitlementType_PremiumPurchase,
+};
+
+enum EDiscordSkuType 
+{
+    DiscordSkuType_Application = 1,
+    DiscordSkuType_DLC,
+    DiscordSkuType_Consumable,
+    DiscordSkuType_Bundle,
+};
+
+enum EDiscordInputModeType 
+{
+    DiscordInputModeType_VoiceActivity = 0,
+    DiscordInputModeType_PushToTalk,
+};
+
+typedef int64_t DiscordClientId;
+typedef int32_t DiscordVersion;
+typedef int64_t DiscordSnowflake;
+typedef int64_t DiscordTimestamp;
+typedef DiscordSnowflake DiscordUserId;
+typedef char DiscordLocale[128];
+typedef char DiscordBranch[4096];
+typedef DiscordSnowflake DiscordLobbyId;
+typedef char DiscordLobbySecret[128];
+typedef char DiscordMetadataKey[256];
+typedef char DiscordMetadataValue[4096];
+typedef uint64_t DiscordNetworkPeerId;
+typedef uint8_t DiscordNetworkChannelId;
+typedef char DiscordPath[4096];
+typedef char DiscordDateTime[64];
+
+struct DiscordUser {
+    DiscordUserId id;
+    char username[256];
+    char discriminator[8];
+    char avatar[128];
+    bool bot;
+};
+
+struct DiscordOAuth2Token {
+    char access_token[128];
+    char scopes[1024];
+    DiscordTimestamp expires;
+};
+
+struct DiscordImageHandle {
+    enum EDiscordImageType type;
+    int64_t id;
+    uint32_t size;
+};
+
+struct DiscordImageDimensions {
+    uint32_t width;
+    uint32_t height;
+};
+
+struct DiscordActivityTimestamps {
+    DiscordTimestamp start;
+    DiscordTimestamp end;
+};
+
+struct DiscordActivityAssets {
+    char large_image[128];
+    char large_text[128];
+    char small_image[128];
+    char small_text[128];
+};
+
+struct DiscordPartySize {
+    int32_t current_size;
+    int32_t max_size;
+};
+
+struct DiscordActivityParty {
+    char id[128];
+    struct DiscordPartySize size;
+};
+
+struct DiscordActivitySecrets {
+    char match[128];
+    char join[128];
+    char spectate[128];
+};
+
+struct DiscordActivity {
+    enum EDiscordActivityType type;
+    int64_t application_id;
+    char name[128];
+    char state[128];
+    char details[128];
+    struct DiscordActivityTimestamps timestamps;
+    struct DiscordActivityAssets assets;
+    struct DiscordActivityParty party;
+    struct DiscordActivitySecrets secrets;
+    bool instance;
+};
+
+struct DiscordPresence {
+    enum EDiscordStatus status;
+    struct DiscordActivity activity;
+};
+
+struct DiscordRelationship {
+    enum EDiscordRelationshipType type;
+    struct DiscordUser user;
+    struct DiscordPresence presence;
+};
+
+struct DiscordLobby {
+    DiscordLobbyId id;
+    enum EDiscordLobbyType type;
+    DiscordUserId owner_id;
+    DiscordLobbySecret secret;
+    uint32_t capacity;
+    bool locked;
+};
+
+struct DiscordImeUnderline {
+    int32_t from;
+    int32_t to;
+    uint32_t color;
+    uint32_t background_color;
+    bool thick;
+};
+
+struct DiscordRect {
+    int32_t left;
+    int32_t top;
+    int32_t right;
+    int32_t bottom;
+};
+
+struct DiscordFileStat {
+    char filename[260];
+    uint64_t size;
+    uint64_t last_modified;
+};
+
+struct DiscordEntitlement {
+    DiscordSnowflake id;
+    enum EDiscordEntitlementType type;
+    DiscordSnowflake sku_id;
+};
+
+struct DiscordSkuPrice {
+    uint32_t amount;
+    char currency[16];
+};
+
+struct DiscordSku {
+    DiscordSnowflake id;
+    enum EDiscordSkuType type;
+    char name[256];
+    struct DiscordSkuPrice price;
+};
+
+struct DiscordInputMode {
+    enum EDiscordInputModeType type;
+    char shortcut[256];
+};
+
+struct DiscordUserAchievement {
+    DiscordSnowflake user_id;
+    DiscordSnowflake achievement_id;
+    uint8_t percent_complete;
+    DiscordDateTime unlocked_at;
+};
+
+struct IDiscordLobbyTransaction 
+{
+    enum EDiscordResult (*set_type)(struct IDiscordLobbyTransaction* lobby_transaction,
+                                    enum EDiscordLobbyType type);
+    enum EDiscordResult (*set_owner)(struct IDiscordLobbyTransaction* lobby_transaction,
+                                     DiscordUserId owner_id);
+    enum EDiscordResult (*set_capacity)(struct IDiscordLobbyTransaction* lobby_transaction,
+                                        uint32_t capacity);
+    enum EDiscordResult (*set_metadata)(struct IDiscordLobbyTransaction* lobby_transaction,
+                                        DiscordMetadataKey key,
+                                        DiscordMetadataValue value);
+    enum EDiscordResult (*delete_metadata)(struct IDiscordLobbyTransaction* lobby_transaction,
+                                           DiscordMetadataKey key);
+    enum EDiscordResult (*set_locked)(struct IDiscordLobbyTransaction* lobby_transaction,
+                                      bool locked);
+};
+
+struct IDiscordLobbyMemberTransaction 
+{
+    EDiscordResult (*set_metadata)(IDiscordLobbyMemberTransaction* lobby_member_transaction, DiscordMetadataKey key, DiscordMetadataValue value);
+    EDiscordResult (*delete_metadata)(IDiscordLobbyMemberTransaction* lobby_member_transaction, DiscordMetadataKey key);
+};
+
+struct IDiscordLobbySearchQuery 
+{
+    EDiscordResult (*filter)(IDiscordLobbySearchQuery* lobby_search_query, DiscordMetadataKey key, EDiscordLobbySearchComparison comparison, EDiscordLobbySearchCast cast, DiscordMetadataValue value);
+    EDiscordResult (*sort)(IDiscordLobbySearchQuery* lobby_search_query, DiscordMetadataKey key, EDiscordLobbySearchCast cast, DiscordMetadataValue value);
+    EDiscordResult (*limit)(IDiscordLobbySearchQuery* lobby_search_query, uint32_t limit);
+    EDiscordResult (*distance)(struct IDiscordLobbySearchQuery* lobby_search_query, EDiscordLobbySearchDistance distance);
+};
+
+typedef void* IDiscordApplicationEvents;
+
+struct IDiscordApplicationManager 
+{
+    void (*validate_or_exit)(IDiscordApplicationManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*get_current_locale)(IDiscordApplicationManager* manager, DiscordLocale* locale);
+    void (*get_current_branch)(IDiscordApplicationManager* manager, DiscordBranch* branch);
+    void (*get_oauth2_token)(IDiscordApplicationManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, DiscordOAuth2Token* oauth2_token));
+    void (*get_ticket)(struct IDiscordApplicationManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, const char* data));
+};
+
+struct IDiscordUserEvents 
+{
+    void (*on_current_user_update)(void* event_data);
+};
+
+struct IDiscordUserManager 
+{
+    EDiscordResult (*get_current_user)(IDiscordUserManager* manager, DiscordUser* current_user);
+    void (*get_user)(IDiscordUserManager* manager, DiscordUserId user_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, DiscordUser* user));
+    EDiscordResult (*get_current_user_premium_type)(IDiscordUserManager* manager, EDiscordPremiumType* premium_type);
+    EDiscordResult (*current_user_has_flag)(struct IDiscordUserManager* manager, EDiscordUserFlag flag, bool* has_flag);
+};
+
+typedef void* IDiscordImageEvents;
+
+struct IDiscordImageManager 
+{
+    void (*fetch)(IDiscordImageManager* manager, DiscordImageHandle handle, bool refresh, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, DiscordImageHandle handle_result));
+    EDiscordResult (*get_dimensions)(IDiscordImageManager* manager, DiscordImageHandle handle, DiscordImageDimensions* dimensions);
+    EDiscordResult (*get_data)(IDiscordImageManager* manager, DiscordImageHandle handle, uint8_t* data, uint32_t data_length);
+};
+
+struct IDiscordActivityEvents 
+{
+    void (*on_activity_join)(void* event_data, const char* secret);
+    void (*on_activity_spectate)(void* event_data, const char* secret);
+    void (*on_activity_join_request)(void* event_data, DiscordUser* user);
+    void (*on_activity_invite)(void* event_data, EDiscordActivityActionType type, DiscordUser* user, DiscordActivity* activity);
+};
+
+struct IDiscordActivityManager 
+{
+    EDiscordResult (*register_command)(IDiscordActivityManager* manager, const char* command);
+    EDiscordResult (*register_steam)(IDiscordActivityManager* manager, uint32_t steam_id);
+    void (*update_activity)(IDiscordActivityManager* manager, DiscordActivity* activity, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*clear_activity)(IDiscordActivityManager* manager, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*send_request_reply)(IDiscordActivityManager* manager, DiscordUserId user_id, EDiscordActivityJoinRequestReply reply, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*send_invite)(IDiscordActivityManager* manager, DiscordUserId user_id, EDiscordActivityActionType type, const char* content, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*accept_invite)(IDiscordActivityManager* manager, DiscordUserId user_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+};
+
+struct IDiscordRelationshipEvents 
+{
+    void (*on_refresh)(void* event_data);
+    void (*on_relationship_update)(void* event_data, DiscordRelationship* relationship);
+};
+
+struct IDiscordRelationshipManager 
+{
+    void (*filter)(IDiscordRelationshipManager* manager, void* filter_data, bool (*filter)(void* filter_data, DiscordRelationship* relationship));
+    EDiscordResult (*count)(IDiscordRelationshipManager* manager, int32_t* count);
+    EDiscordResult (*get)(IDiscordRelationshipManager* manager, DiscordUserId user_id, DiscordRelationship* relationship);
+    EDiscordResult (*get_at)(IDiscordRelationshipManager* manager, uint32_t index, DiscordRelationship* relationship);
+};
+
+struct IDiscordLobbyEvents 
+{
+    void (*on_lobby_update)(void* event_data, int64_t lobby_id);
+    void (*on_lobby_delete)(void* event_data, int64_t lobby_id, uint32_t reason);
+    void (*on_member_connect)(void* event_data, int64_t lobby_id, int64_t user_id);
+    void (*on_member_update)(void* event_data, int64_t lobby_id, int64_t user_id);
+    void (*on_member_disconnect)(void* event_data, int64_t lobby_id, int64_t user_id);
+    void (*on_lobby_message)(void* event_data, int64_t lobby_id, int64_t user_id, uint8_t* data, uint32_t data_length);
+    void (*on_speaking)(void* event_data, int64_t lobby_id, int64_t user_id, bool speaking);
+    void (*on_network_message)(void* event_data, int64_t lobby_id, int64_t user_id, uint8_t channel_id, uint8_t* data, uint32_t data_length);
+};
+
+struct IDiscordLobbyManager 
+{
+    EDiscordResult (*get_lobby_create_transaction)(IDiscordLobbyManager* manager, IDiscordLobbyTransaction** transaction);
+    EDiscordResult (*get_lobby_update_transaction)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, IDiscordLobbyTransaction** transaction);
+    EDiscordResult (*get_member_update_transaction)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, IDiscordLobbyMemberTransaction** transaction);
+    void (*create_lobby)(IDiscordLobbyManager* manager, IDiscordLobbyTransaction* transaction, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, DiscordLobby* lobby));
+    void (*update_lobby)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, IDiscordLobbyTransaction* transaction, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*delete_lobby)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*connect_lobby)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordLobbySecret secret, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, DiscordLobby* lobby));
+    void (*connect_lobby_with_activity_secret)(IDiscordLobbyManager* manager, DiscordLobbySecret activity_secret, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, DiscordLobby* lobby));
+    void (*disconnect_lobby)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    EDiscordResult (*get_lobby)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordLobby* lobby);
+    EDiscordResult (*get_lobby_activity_secret)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordLobbySecret* secret);
+    EDiscordResult (*get_lobby_metadata_value)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordMetadataKey key, DiscordMetadataValue* value);
+    EDiscordResult (*get_lobby_metadata_key)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t index, DiscordMetadataKey* key);
+    EDiscordResult (*lobby_metadata_count)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t* count);
+    EDiscordResult (*member_count)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t* count);
+    EDiscordResult (*get_member_user_id)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t index, DiscordUserId* user_id);
+    EDiscordResult (*get_member_user)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, DiscordUser* user);
+    EDiscordResult (*get_member_metadata_value)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, DiscordMetadataKey key, DiscordMetadataValue* value);
+    EDiscordResult (*get_member_metadata_key)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, int32_t index, DiscordMetadataKey* key);
+    EDiscordResult (*member_metadata_count)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, int32_t* count);
+    void (*update_member)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, IDiscordLobbyMemberTransaction* transaction, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*send_lobby_message)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, uint8_t* data, uint32_t data_length, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    EDiscordResult (*get_search_query)(IDiscordLobbyManager* manager, IDiscordLobbySearchQuery** query);
+    void (*search)(IDiscordLobbyManager* manager, IDiscordLobbySearchQuery* query, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*lobby_count)(struct IDiscordLobbyManager* manager, int32_t* count);
+    EDiscordResult (*get_lobby_id)(IDiscordLobbyManager* manager, int32_t index, DiscordLobbyId* lobby_id);
+    void (*connect_voice)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*disconnect_voice)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    EDiscordResult (*connect_network)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id);
+    EDiscordResult (*disconnect_network)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id);
+    EDiscordResult (*flush_network)(IDiscordLobbyManager* manager);
+    EDiscordResult (*open_network_channel)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, uint8_t channel_id, bool reliable);
+    EDiscordResult (*send_network_message)(IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, uint8_t channel_id, uint8_t* data, uint32_t data_length);
+};
+
+struct IDiscordNetworkEvents 
+{
+    void (*on_message)(void* event_data, DiscordNetworkPeerId peer_id, DiscordNetworkChannelId channel_id, uint8_t* data, uint32_t data_length);
+    void (*on_route_update)(void* event_data, const char* route_data);
+};
+
+struct IDiscordNetworkManager 
+{
+    void (*get_peer_id)(IDiscordNetworkManager* manager, DiscordNetworkPeerId* peer_id);
+    EDiscordResult (*flush)(IDiscordNetworkManager* manager);
+    EDiscordResult (*open_peer)(IDiscordNetworkManager* manager, DiscordNetworkPeerId peer_id, const char* route_data);
+    EDiscordResult (*update_peer)(IDiscordNetworkManager* manager, DiscordNetworkPeerId peer_id, const char* route_data);
+    EDiscordResult (*close_peer)(IDiscordNetworkManager* manager, DiscordNetworkPeerId peer_id);
+    EDiscordResult (*open_channel)(IDiscordNetworkManager* manager, DiscordNetworkPeerId peer_id, DiscordNetworkChannelId channel_id, bool reliable);
+    EDiscordResult (*close_channel)(IDiscordNetworkManager* manager, DiscordNetworkPeerId peer_id, DiscordNetworkChannelId channel_id);
+    EDiscordResult (*send_message)(IDiscordNetworkManager* manager, DiscordNetworkPeerId peer_id, DiscordNetworkChannelId channel_id, uint8_t* data, uint32_t data_length);
+};
+
+struct IDiscordOverlayEvents 
+{
+    void (*on_toggle)(void* event_data, bool locked);
+};
+
+struct IDiscordOverlayManager 
+{
+    void (*is_enabled)(IDiscordOverlayManager* manager, bool* enabled);
+    void (*is_locked)(IDiscordOverlayManager* manager, bool* locked);
+    void (*set_locked)(IDiscordOverlayManager* manager, bool locked, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*open_activity_invite)(IDiscordOverlayManager* manager, EDiscordActivityActionType type, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*open_guild_invite)(IDiscordOverlayManager* manager, const char* code, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*open_voice_settings)(IDiscordOverlayManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    EDiscordResult (*init_drawing_dxgi)(IDiscordOverlayManager* manager, IDXGISwapChain* swapchain, bool use_message_forwarding);
+    void (*on_present)(IDiscordOverlayManager* manager);
+    void (*forward_message)(IDiscordOverlayManager* manager, MSG* message);
+    void (*key_event)(IDiscordOverlayManager* manager, bool down, const char* key_code, EDiscordKeyVariant variant);
+    void (*char_event)(IDiscordOverlayManager* manager, const char* character);
+    void (*mouse_button_event)(IDiscordOverlayManager* manager, uint8_t down, int32_t click_count, EDiscordMouseButton which, int32_t x, int32_t y);
+    void (*mouse_motion_event)(IDiscordOverlayManager* manager, int32_t x, int32_t y);
+    void (*ime_commit_text)(IDiscordOverlayManager* manager, const char* text);
+    void (*ime_set_composition)(IDiscordOverlayManager* manager, const char* text, struct DiscordImeUnderline* underlines, uint32_t underlines_length, int32_t from, int32_t to);
+    void (*ime_cancel_composition)(IDiscordOverlayManager* manager);
+    void (*set_ime_composition_range_callback)(IDiscordOverlayManager* manager, void* on_ime_composition_range_changed_data, void (*on_ime_composition_range_changed)(void* on_ime_composition_range_changed_data, int32_t from, int32_t to, struct DiscordRect* bounds, uint32_t bounds_length));
+    void (*set_ime_selection_bounds_callback)(DiscordOverlayManager* manager, void* on_ime_selection_bounds_changed_data, void (*on_ime_selection_bounds_changed)(void* on_ime_selection_bounds_changed_data, struct DiscordRect anchor, struct DiscordRect focus, bool is_anchor_first));
+    bool (*is_point_inside_click_zone)(IDiscordOverlayManager* manager, int32_t x, int32_t y);
+};
+
+typedef void* IDiscordStorageEvents;
+
+struct IDiscordStorageManager 
+{
+    EDiscordResult (*read)(IDiscordStorageManager* manager, const char* name, uint8_t* data, uint32_t data_length, uint32_t* read);
+    void (*read_async)(IDiscordStorageManager* manager, const char* name, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, uint8_t* data, uint32_t data_length));
+    void (*read_async_partial)(IDiscordStorageManager* manager, const char* name, uint64_t offset, uint64_t length, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result, uint8_t* data, uint32_t data_length));
+    EDiscordResult (*write)(IDiscordStorageManager* manager, const char* name, uint8_t* data, uint32_t data_length);
+    void (*write_async)(IDiscordStorageManager* manager, const char* name, uint8_t* data, uint32_t data_length, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    EDiscordResult (*delete_)(IDiscordStorageManager* manager, const char* name);
+    EDiscordResult (*exists)(IDiscordStorageManager* manager, const char* name, bool* exists);
+    void (*count)(struct IDiscordStorageManager* manager, int32_t* count);
+    EDiscordResult (*stat)(IDiscordStorageManager* manager, const char* name, DiscordFileStat* stat);
+    EDiscordResult (*stat_at)(IDiscordStorageManager* manager, int32_t index, DiscordFileStat* stat);
+    EDiscordResult (*get_path)(IDiscordStorageManager* manager, DiscordPath* path);
+};
+
+struct IDiscordStoreEvents 
+{
+    void (*on_entitlement_create)(void* event_data, DiscordEntitlement* entitlement);
+    void (*on_entitlement_delete)(void* event_data, DiscordEntitlement* entitlement);
+};
+
+struct IDiscordStoreManager 
+{
+    void (*fetch_skus)(IDiscordStoreManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*count_skus)(IDiscordStoreManager* manager, int32_t* count);
+    EDiscordResult (*get_sku)(IDiscordStoreManager* manager, DiscordSnowflake sku_id, DiscordSku* sku);
+    EDiscordResult (*get_sku_at)(IDiscordStoreManager* manager, int32_t index, DiscordSku* sku);
+    void (*fetch_entitlements)(IDiscordStoreManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*count_entitlements)(IDiscordStoreManager* manager, int32_t* count);
+    EDiscordResult (*get_entitlement)(IDiscordStoreManager* manager, DiscordSnowflake entitlement_id, DiscordEntitlement* entitlement);
+    EDiscordResult (*get_entitlement_at)(IDiscordStoreManager* manager, int32_t index, DiscordEntitlement* entitlement);
+    EDiscordResult (*has_sku_entitlement)(IDiscordStoreManager* manager, DiscordSnowflake sku_id, bool* has_entitlement);
+    void (*start_purchase)(IDiscordStoreManager* manager, DiscordSnowflake sku_id, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+};
+
+struct IDiscordVoiceEvents 
+{
+    void (*on_settings_update)(void* event_data);
+};
+
+struct IDiscordVoiceManager 
+{
+    EDiscordResult (*get_input_mode)(IDiscordVoiceManager* manager, DiscordInputMode* input_mode);
+    void (*set_input_mode)(IDiscordVoiceManager* manager, DiscordInputMode input_mode, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    EDiscordResult (*is_self_mute)(IDiscordVoiceManager* manager, bool* mute);
+    EDiscordResult (*set_self_mute)(IDiscordVoiceManager* manager, bool mute);
+    EDiscordResult (*is_self_deaf)(IDiscordVoiceManager* manager, bool* deaf);
+    EDiscordResult (*set_self_deaf)(IDiscordVoiceManager* manager, bool deaf);
+    EDiscordResult (*is_local_mute)(IDiscordVoiceManager* manager, DiscordSnowflake user_id, bool* mute);
+    EDiscordResult (*set_local_mute)(IDiscordVoiceManager* manager, DiscordSnowflake user_id, bool mute);
+    EDiscordResult (*get_local_volume)(IDiscordVoiceManager* manager, DiscordSnowflake user_id, uint8_t* volume);
+    EDiscordResult (*set_local_volume)(IDiscordVoiceManager* manager, DiscordSnowflake user_id, uint8_t volume);
+};
+
+struct IDiscordAchievementEvents 
+{
+    void (*on_user_achievement_update)(void* event_data, DiscordUserAchievement* user_achievement);
+};
+
+struct IDiscordAchievementManager 
+{
+    void (*set_user_achievement)(IDiscordAchievementManager* manager, DiscordSnowflake achievement_id, uint8_t percent_complete, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*fetch_user_achievements)(IDiscordAchievementManager* manager, void* callback_data, void (*callback)(void* callback_data, EDiscordResult result));
+    void (*count_user_achievements)(struct IDiscordAchievementManager* manager, int32_t* count);
+    EDiscordResult (*get_user_achievement)(struct IDiscordAchievementManager* manager, DiscordSnowflake user_achievement_id, DiscordUserAchievement* user_achievement);
+    EDiscordResult (*get_user_achievement_at)(IDiscordAchievementManager* manager, int32_t index, DiscordUserAchievement* user_achievement);
+};
+
+typedef void* IDiscordCoreEvents;
+
+struct IDiscordCore 
+{
+    void (*destroy)(IDiscordCore* core);
+    EDiscordResult (*run_callbacks)(IDiscordCore* core);
+    void (*set_log_hook)(IDiscordCore* core, EDiscordLogLevel min_level, void* hook_data, void (*hook)(void* hook_data, EDiscordLogLevel level, const char* message));
+    IDiscordApplicationManager* (*get_application_manager)(IDiscordCore* core);
+    IDiscordUserManager* (*get_user_manager)(IDiscordCore* core);
+    IDiscordImageManager* (*get_image_manager)(IDiscordCore* core);
+    IDiscordActivityManager* (*get_activity_manager)(IDiscordCore* core);
+    IDiscordRelationshipManager* (*get_relationship_manager)(IDiscordCore* core);
+    IDiscordLobbyManager* (*get_lobby_manager)(IDiscordCore* core);
+    IDiscordNetworkManager* (*get_network_manager)(IDiscordCore* core);
+    IDiscordOverlayManager* (*get_overlay_manager)(IDiscordCore* core);
+    IDiscordStorageManager* (*get_storage_manager)(IDiscordCore* core);
+    IDiscordStoreManager* (*get_store_manager)(IDiscordCore* core);
+    IDiscordVoiceManager* (*get_voice_manager)(IDiscordCore* core);
+    IDiscordAchievementManager* (*get_achievement_manager)(IDiscordCore* core);
+};
+
+struct DiscordCreateParams 
+{
+    DiscordClientId client_id;
+    uint64_t flags;
+    IDiscordCoreEvents* events;
+    void* event_data;
+    IDiscordApplicationEvents* application_events;
+    DiscordVersion application_version;
+    struct IDiscordUserEvents* user_events;
+    DiscordVersion user_version;
+    IDiscordImageEvents* image_events;
+    DiscordVersion image_version;
+    struct IDiscordActivityEvents* activity_events;
+    DiscordVersion activity_version;
+    struct IDiscordRelationshipEvents* relationship_events;
+    DiscordVersion relationship_version;
+    struct IDiscordLobbyEvents* lobby_events;
+    DiscordVersion lobby_version;
+    struct IDiscordNetworkEvents* network_events;
+    DiscordVersion network_version;
+    struct IDiscordOverlayEvents* overlay_events;
+    DiscordVersion overlay_version;
+    IDiscordStorageEvents* storage_events;
+    DiscordVersion storage_version;
+    struct IDiscordStoreEvents* store_events;
+    DiscordVersion store_version;
+    struct IDiscordVoiceEvents* voice_events;
+    DiscordVersion voice_version;
+    struct IDiscordAchievementEvents* achievement_events;
+    DiscordVersion achievement_version;
+};
+
+enum MT
+{
+	MT_NORMAL = 0,
+	MT_HIERRARHY = 1,
+	MT_PROGRESSIVE = 2,
+	MT_SKELETON_ANIM = 3,
+	MT_SKELETON_GEOMDEF_PM = 4,
+	MT_SKELETON_GEOMDEF_ST = 5,
+	MT_LOD = 6,
+	MT_TREE_ST = 7,
+	MT_PARTICLE_EFFECT = 8,
+	MT_PARTICLE_GROUP = 9,
+	MT_SKELETON_RIGID = 10,
+	MT_TREE_PM = 11,
+
+	MT_3DFLUIDVOLUME = 12,
+};
+
+enum OGF_Chuncks
+{
+	OGF_HEADER = 1,
+	OGF_TEXTURE = 2,
+	OGF_VERTICES = 3,
+	OGF_INDICES = 4,
+	OGF_P_MAP = 5,
+	OGF_SWIDATA = 6,
+	OGF_VCONTAINER = 7,
+	// not used ??
+	OGF_ICONTAINER = 8,
+	// not used ??
+	OGF_CHILDREN = 9,
+	// * For skeletons only
+	OGF_CHILDREN_L = 10,
+	// Link to child visuals
+	OGF_LODDEF2 = 11,
+	// + 5 channel data
+	OGF_TREEDEF2 = 12,
+	// + 5 channel data
+	OGF_S_BONE_NAMES = 13,
+	// * For skeletons only
+	OGF_S_MOTIONS = 14,
+	OGF_S_SMPARAMS = 15,
+	OGF_S_IKDATA = 16,
+	OGF_S_USERDATA = 17,
+	OGF_S_DESC = 18,
+	OGF_S_MOTION_REFS = 19,
+	OGF_SWICONTAINER = 20,
+	// * SlidingWindowItem record container
+	OGF_GCONTAINER = 21,
+	// * both VB&IB
+	OGF_FASTPATH = 22,
+	// * extended/fast geometry
+	OGF_S_LODS = 23,
+	OGF_S_MOTION_REFS2 = 24,
+	// * changes in format
+	OGF_COLLISION_VERTICES = 25,
+	OGF_COLLISION_INDICES = 26,
+	OGF_forcedword = 0xFFFFFFFF
+};
+
+enum OGF_SkeletonVertType
+{
+	OGF_VERTEXFORMAT_FVF_1L = 1 * 0x12071980,
+	OGF_VERTEXFORMAT_FVF_2L = 2 * 0x12071980,
+	OGF_VERTEXFORMAT_FVF_3L = 4 * 0x12071980,
+	OGF_VERTEXFORMAT_FVF_4L = 5 * 0x12071980,
+	OGF_VERTEXFORMAT_FVF_NL = 3 * 0x12071980,
+};
+
+struct ogf_desc
+{
+	shared_str source_file;
+	shared_str build_name;
+	time_t build_time;
+	shared_str create_name;
+	time_t create_time;
+	shared_str modif_name;
+	time_t modif_time;
+
+	ogf_desc() : build_time(0), create_time(0), modif_time(0);
+	void Load(IReader& F);
+	void Save(IWriter& F);
+};
+
+struct ogf_bbox
+{
+	Fvector min;
+	Fvector max;
+};
+
+struct ogf_bsphere
+{
+	Fvector c;
+	float r;
+};
+
+struct ogf_header
+{
+	u8 format_version; // = xrOGF_FormatVersion
+	u8 type; // MT
+	u16 shader_id; // should not be ZERO
+	ogf_bbox bb;
+	ogf_bsphere bs;
+};
+
+struct FSlideWindow
+{
+	u32 offset;
+	u16 num_tris;
+	u16 num_verts;
+};
+
+struct FSlideWindowItem
+{
+	FSlideWindow* sw;
+	u32 count;
+	u32 reserved[4];
+
+	FSlideWindowItem() : sw(0), count(0);
+};
+
+enum
+{
+  fsGradient = (1 << 0),
+  fsDeviceIndependent = (1 << 1),
+  fsValid = (1 << 2),
+  fsMultibyte = (1 << 3),
+  fsForceDWORD = u32(-1)
+};
+
+enum EAligment
+{
+  alLeft = 0,
+  alRight,
+  alCenter
+};
+
+struct String
+{
+  string1024 string;
+  float x, y;
+  float height;
+  u32 c;
+  EAligment align;
+};
+
+class CGameFont
+{
+public:
+	CGameFont(LPCSTR section, u32 flags = 0);
+	CGameFont(LPCSTR shader, LPCSTR texture, u32 flags = 0);
+	~CGameFont();
+	void Initialize(LPCSTR shader, LPCSTR texture);
+	void SetColor(u32 C);
+	void SetHeightI(float S);
+	void SetHeight(float S);
+	float GetHeight();
+	void SetInterval(float x, float y);
+	void SetInterval(const Fvector2& v);
+	void SetAligment(EAligment aligment);
+	float SizeOf_(LPCSTR s);
+	float SizeOf_(const wide_char* wsStr);
+	float SizeOf_(const char cChar);
+	float CurrentHeight_();
+	void OutSetI(float x, float y);
+	void OutSet(float x, float y);
+	void MasterOut(BOOL bCheckDevice, BOOL bUseCoords, BOOL bScaleCoords, BOOL bUseSkip, float _x, float _y, float _skip, LPCSTR fmt, va_list p);
+	u32 smart_strlen(const char* S);
+	BOOL IsMultibyte() { return (uFlags & fsMultibyte); };
+	u16 SplitByWidth(u16* puBuffer, u16 uBufferSize, float fTargetWidth, const char* pszText);
+	u16 GetCutLengthPos(float fTargetWidth, const char* pszText);
+	void OutI(float _x, float _y, LPCSTR fmt, ...);
+	void Out(float _x, float _y, LPCSTR fmt, ...);
+	void OutNext(LPCSTR fmt, ...);
+	void OutSkip(float val = 1.f);
+	void OnRender();
+	void Clear();
+
+public:
+  shared_str m_font_name;
+
+protected:
+	Fvector2 vHalfPixel;
+	Ivector2 vTS;
+	EAligment eCurrentAlignment;
+	u32 dwCurrentColor;
+	float fCurrentHeight;
+	float fCurrentX, fCurrentY;
+	Fvector2 vInterval;
+	Fvector* TCMap;
+	float fHeight;
+	float fXStep;
+	float fYStep;
+	float fTCHeight;
+	xr_vector<String> strings;
+	IFontRender* pFontRender;
+	u32 nNumChars;
+	u32 uFlags;
+
+protected:
+	const Fvector& GetCharTC(u16 c);
+  
+private:
+	friend class dxFontRender;
+};
+
+#define HUD_CROSSHAIR (1<<0)
+#define HUD_CROSSHAIR_DIST (1<<1)
+#define HUD_WEAPON (1<<2)
+#define HUD_INFO (1<<3)
+#define HUD_DRAW (1<<4)
+#define HUD_CROSSHAIR_RT (1<<5)
+#define HUD_WEAPON_RT (1<<6)
+#define HUD_CROSSHAIR_DYNAMIC (1<<7)
+#define HUD_CROSSHAIR_RT2 (1<<9)
+#define HUD_DRAW_RT (1<<10)
+#define HUD_WEAPON_RT2 (1<<11)
+#define HUD_DRAW_RT2 (1<<12)
+#define BI_NONE (u16(-1))
+#define OGF_IKDATA_VERSION 0x0001
+#define MAX_BONE_PARAMS 4
+#define effCustomEffectorStartID 10000
+#define bDebug 0
+#define _game_data_ "$game_data$"
+#define _game_textures_ "$game_textures$"
+#define _game_levels_ "$game_levels$"
+#define _game_sounds_ "$game_sounds$"
+#define _game_meshes_ "$game_meshes$"
+#define _game_shaders_ "$game_shaders$"
+#define _game_config_ "$game_congif$"
+#define _server_root_ "$server_root$"
+#define _server_data_root_ "$server_data_root$"
+#define _local_root_ "$local_root$"
+#define _import_ "$import$"
+#define _sounds_ "$sounds$"
+#define _textures_ "$textures$"
+#define _objects_ "$objects$"
+#define _maps_ "$maps$"
+#define _temp_ "$temp$"
+#define _omotion_ "$omotion$"
+#define _omotions_ "$omotions$"
+#define _smotion_ "$smotion$"
+#define _detail_objects_ "$detail_objects$"
+#define R_VIEWPORT_NEAR 0.005f
+#define DEVICE_RESET_PRECACHE_FRAME_COUNT 10
+#define SHAPE_TCB 0
+#define SHAPE_HERM 1
+#define SHAPE_BEZI 2
+#define SHAPE_LINE 3
+#define SHAPE_STEP 4
+#define SHAPE_BEZ2 5
+#define BEH_RESET 0
+#define BEH_CONSTANT 1
+#define BEH_REPEAT 2
+#define BEH_OSCILLATE 3
+#define BEH_OFFSET 4
+#define BEH_LINEAR 5
+#define WFX_TRANS_TIME 5.f
+#define DAY_LENGTH 86400.f
+#define DISCORD_VERSION 2
+#define DISCORD_APPLICATION_MANAGER_VERSION 1
+#define DISCORD_USER_MANAGER_VERSION 1
+#define DISCORD_IMAGE_MANAGER_VERSION 1
+#define DISCORD_ACTIVITY_MANAGER_VERSION 1
+#define DISCORD_RELATIONSHIP_MANAGER_VERSION 1
+#define DISCORD_LOBBY_MANAGER_VERSION 1
+#define DISCORD_NETWORK_MANAGER_VERSION 1
+#define DISCORD_OVERLAY_MANAGER_VERSION 2
+#define DISCORD_STORAGE_MANAGER_VERSION 1
+#define DISCORD_STORE_MANAGER_VERSION 1
+#define DISCORD_VOICE_MANAGER_VERSION 1
+#define DISCORD_ACHIEVEMENT_MANAGER_VERSION 1
+
+
+float psCamInert = 0.f;
+float psCamSlideInert = 0.25f;
+u32 psCurrentBPP = 32;
+int psTextureLOD = 1;
+float refresh_rate = 0;
+volatile u32 mt_Thread_marker = 0x12345678;
+int g_svDedicateServerUpdateReate = 100;
+u32 app_inactive_time = 0;
+u32 app_inactive_time_start = 0;
+float psVisDistance = 1.f;
+static const float MAX_NOISE_FREQ = 0.03f;
+const float MAX_DIST_FACTOR = 0.95f;
+const float fuzzy_update_vis = 1000.f; // speed of fuzzy-logic desisions
+const float fuzzy_update_novis = 1000.f; // speed of fuzzy-logic desisions
+const float fuzzy_guaranteed = 0.001f; // distance which is supposed 100% visible
+const float lr_granularity = 0.1f; // assume similar positions
+const u16 xrOGF_SMParamsVersion = 4;
+const u8 xrOGF_FormatVersion = 4;
