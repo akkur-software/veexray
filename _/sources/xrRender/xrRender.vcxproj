@@ -19,6 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\sdk\projects\discord\discord.vcxproj">
+      <Project>{940cd250-ba77-4d7c-a8d4-552f67dd3ae4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\sdk\projects\libtheora\libtheora.vcxproj">
+      <Project>{0bdf3377-f84e-4b42-a605-b45aaa244cb6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\xrCDB\xrCDB.vcxproj">
+      <Project>{a19b1df2-82ec-4364-8bdf-85d13a1c89b5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\xrCore\xrCore.vcxproj">
+      <Project>{a0f7d1fb-59a7-4717-a7e4-96f37e91998e}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Blender.cpp" />
     <ClCompile Include="blender_bloom_build.cpp" />
     <ClCompile Include="blender_blur.cpp" />
@@ -72,6 +87,7 @@
     <ClCompile Include="dx103DFluidRenderer.cpp" />
     <ClCompile Include="dx103DFluidVolume.cpp" />
     <ClCompile Include="dx10BufferUtils.cpp" />
+    <ClCompile Include="dx10ConstantBuffer.cpp" />
     <ClCompile Include="dx10HW.cpp" />
     <ClCompile Include="dx10MSAABlender.cpp" />
     <ClCompile Include="dx10RainBlender.cpp" />
@@ -240,6 +256,8 @@
     <ClCompile Include="xr_efflensflare.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationKeyCalculate.h" />
     <ClInclude Include="animation_blend.h" />
     <ClInclude Include="animation_motion.h" />
     <ClInclude Include="ApplicationRender.h" />
@@ -276,6 +294,7 @@
     <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="ConsoleRender.h" />
     <ClInclude Include="CSCompiler.h" />
+    <ClInclude Include="D3DExtensions.h" />
     <ClInclude Include="D3DUtils.h" />
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="DebugShader.h" />
@@ -299,6 +318,8 @@
     <ClInclude Include="dx103DFluidRenderer.h" />
     <ClInclude Include="dx103DFluidVolume.h" />
     <ClInclude Include="dx10BufferUtils.h" />
+    <ClInclude Include="dx10ConstantBuffer.h" />
+    <ClInclude Include="dx10ConstantBuffer_impl.h" />
     <ClInclude Include="dx10MSAABlender.h" />
     <ClInclude Include="dx10RainBlender.h" />
     <ClInclude Include="dx10R_Backend_Runtime.h" />
@@ -458,20 +479,6 @@
     <ClInclude Include="xr_area.h" />
     <ClInclude Include="xr_effgamma.h" />
     <ClInclude Include="xr_efflensflare.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\sdk\projects\discord\discord.vcxproj">
-      <Project>{940cd250-ba77-4d7c-a8d4-552f67dd3ae4}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\sdk\projects\libtheora\libtheora.vcxproj">
-      <Project>{0bdf3377-f84e-4b42-a605-b45aaa244cb6}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\xrCDB\xrCDB.vcxproj">
-      <Project>{a19b1df2-82ec-4364-8bdf-85d13a1c89b5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\xrCore\xrCore.vcxproj">
-      <Project>{a0f7d1fb-59a7-4717-a7e4-96f37e91998e}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AC9B12ED-A2D7-4337-A981-5BD8430E96D8}</ProjectGuid>
