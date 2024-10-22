@@ -3317,7 +3317,2269 @@ private:
     static IDiscordLobbyEvents events_;
 };
 
+typedef unsigned short int wide_char;
 
+enum EChannelType
+{
+	ctUnsupported = -1,
+	ctPositionX = 0,
+	ctPositionY,
+	ctPositionZ,
+	ctRotationH,
+	ctRotationP,
+	ctRotationB,
+	ctMaxChannel
+};
+
+struct st_BoneMotion
+{
+  const u32 flWorldOrient = 1 << 0;
+	shared_str name;
+	CEnvelope* envs[ctMaxChannel];
+	Flags8 m_Flags;
+
+	st_BoneMotion();
+	void SetName(LPCSTR nm);
+};
+
+DEFINE_VECTOR(st_BoneMotion, BoneMotionVec, BoneMotionIt);
+
+enum EMotionType
+{
+  mtObject = 0,
+  mtSkeleton,
+  ForceDWORD = u32(-1)
+};
+
+class CCustomMotion
+{
+public:
+	shared_str name;
+  
+public:
+	CCustomMotion();
+	CCustomMotion(CCustomMotion* src);
+	virtual ~CCustomMotion();
+	void SetName(const char* n);
+	LPCSTR Name();
+	int FrameStart();
+	int FrameEnd();
+	float FPS();
+	int Length();
+	void SetParam(int s, int e, float fps);
+	virtual void Save(IWriter& F);
+	virtual bool Load(IReader& F);
+	virtual void SaveMotion(const char* buf) = 0;
+	virtual bool LoadMotion(const char* buf) =0;
+  
+protected:
+	EMotionType mtype;
+	int iFrameStart, iFrameEnd;
+	float fFPS;
+};
+
+//--------------------------------------------------------------------------
+class COMotion : public CCustomMotion
+{
+public:
+	COMotion();
+	COMotion(COMotion* src);
+	virtual ~COMotion();
+	void Clear();
+	void _Evaluate(float t, Fvector& T, Fvector& R);
+	virtual void Save(IWriter& F);
+	virtual bool Load(IReader& F);
+	virtual void SaveMotion(const char* buf);
+	virtual bool LoadMotion(const char* buf);
+	CEnvelope* envs[ctMaxChannel];
+};
+
+enum ESMFlags
+{
+	esmFX = 1 << 0,
+	esmStopAtEnd = 1 << 1,
+	esmNoMix = 1 << 2,
+	esmSyncPart = 1 << 3,
+	esmUseFootSteps = 1 << 4,
+	esmRootMover = 1 << 5,
+	esmIdle = 1 << 6,
+	esmUseWeaponBone = 1 << 7,
+};
+
+class CSMotion: public CCustomMotion
+{
+public:
+  u16 m_BoneOrPart;
+  float fSpeed;
+  float fAccrue;
+  float fFalloff;
+  float fPower;
+  Flags8 m_Flags;
+  xr_vector<motion_marks> marks;    
+    
+public:
+  CSMotion ();
+  CSMotion (CSMotion* src);
+  virtual ~CSMotion ();
+  void _Evaluate (int bone_idx, float t, Fvector& T, Fvector& R);
+  void CopyMotion (CSMotion* src);
+  st_BoneMotion* FindBoneMotion(shared_str name);
+  BoneMotionVec& BoneMotions();
+  Flags8 GetMotionFlags(int bone_idx);
+  void add_empty_motion(shared_str const& bone_id);
+  virtual void Save (IWriter& F);
+  virtual bool Load (IReader& F);
+  virtual void SaveMotion (const char* buf);
+  virtual bool LoadMotion (const char* buf);
+  void SortBonesBySkeleton(BoneVec& bones);
+  void WorldRotate (int boneId, float h, float p, float b);
+  void Optimize ();
+  void Clear ();
+  
+private:
+  BoneMotionVec bone_mots;
+};
+
+struct SAnimParams
+{
+public:
+  float t_current;
+	float tmp;
+	float min_t;
+	float max_t;
+	BOOL bPlay;
+	BOOL bWrapped;
+  
+public:
+	SAnimParams();
+	void Set(CCustomMotion* M);
+	void Set(float start_frame, float end_frame, float fps);
+	float Frame();
+	void Update(float dt, float speed, bool loop);
+	void Play();
+	void Stop();
+	void Pause(bool val);
+};
+
+class NetworkEvents final 
+{
+public:
+    static void OnMessage(void* callbackData, DiscordNetworkPeerId peerId, DiscordNetworkChannelId channelId, uint8_t* data, uint32_t dataLength);
+    static void OnRouteUpdate(void* callbackData, char const* routeData);
+};
+
+class NetworkManager final 
+{
+public:
+    ~NetworkManager() = default;
+    void GetPeerId(NetworkPeerId* peerId);
+    Result Flush();
+    Result OpenPeer(NetworkPeerId peerId, char const* routeData);
+    Result UpdatePeer(NetworkPeerId peerId, char const* routeData);
+    Result ClosePeer(NetworkPeerId peerId);
+    Result OpenChannel(NetworkPeerId peerId, NetworkChannelId channelId, bool reliable);
+    Result CloseChannel(NetworkPeerId peerId, NetworkChannelId channelId);
+    Result SendMessage(NetworkPeerId peerId, NetworkChannelId channelId, std::uint8_t* data, std::uint32_t dataLength);
+    Event<NetworkPeerId, NetworkChannelId, std::uint8_t*, std::uint32_t> OnMessage;
+    Event<char const*> OnRouteUpdate;
+
+private:
+    friend class Core;
+
+    NetworkManager() = default;
+    NetworkManager(NetworkManager const& rhs) = delete;
+    NetworkManager& operator=(NetworkManager const& rhs) = delete;
+    NetworkManager(NetworkManager&& rhs) = delete;
+    NetworkManager& operator=(NetworkManager&& rhs) = delete;
+
+    IDiscordNetworkManager* internal_;
+    static IDiscordNetworkEvents events_;
+};
+
+class CObjectAnimator
+{  
+public:
+	CObjectAnimator();
+	virtual ~CObjectAnimator();
+	void Clear();
+	void Load(LPCSTR name);
+	LPCSTR Name();
+	float& Speed();
+	COMotion* Play(bool bLoop, LPCSTR name = 0);
+	void Pause(bool val);
+	void Stop();
+	BOOL IsPlaying();
+	const Fmatrix& XFORM();
+	const SAnimParams& anim_param();
+	bool bLoop;
+	float GetLength();
+	void Update(float dt);
+	void DrawPath();
+  
+protected:
+	shared_str m_Name;
+	Fmatrix m_XFORM;
+	SAnimParams m_MParam;
+	MotionVec m_Motions;
+	float m_Speed;
+	COMotion* m_Current;
+	void LoadMotions(LPCSTR fname);
+	void SetActiveMotion(COMotion* mot);
+	COMotion* FindMotionByName(LPCSTR name);
+  
+private:
+	DEFINE_VECTOR(COMotion*, MotionVec, MotionIt);
+};
+
+class OverlayEvents final 
+{
+public:
+    static void OnToggle(void* callbackData, bool locked);
+};
+
+class OverlayManager final 
+{
+public:
+    ~OverlayManager() = default;
+    void IsEnabled(bool* enabled);
+    void IsLocked(bool* locked);
+    void SetLocked(bool locked, std::function<void(Result)> callback);
+    void OpenActivityInvite(ActivityActionType type, std::function<void(Result)> callback);
+    void OpenGuildInvite(char const* code, std::function<void(Result)> callback);
+    void OpenVoiceSettings(std::function<void(Result)> callback);
+    Result InitDrawingDxgi(IDXGISwapChain* swapchain, bool useMessageForwarding);
+    void OnPresent();
+    void ForwardMessage(MSG* message);
+    void KeyEvent(bool down, char const* keyCode, KeyVariant variant);
+    void CharEvent(char const* character);
+    void MouseButtonEvent(std::uint8_t down, std::int32_t clickCount, MouseButton which, std::int32_t x, std::int32_t y);
+    void MouseMotionEvent(std::int32_t x, std::int32_t y);
+    void ImeCommitText(char const* text);
+    void ImeSetComposition(char const* text, ImeUnderline* underlines, std::uint32_t underlinesLength, std::int32_t from, std::int32_t to);
+    void ImeCancelComposition();
+    void SetImeCompositionRangeCallback(std::function<void(std::int32_t, std::int32_t, Rect*, std::uint32_t)> onImeCompositionRangeChanged);
+    void SetImeSelectionBoundsCallback(std::function<void(Rect, Rect, bool)> onImeSelectionBoundsChanged);
+    bool IsPointInsideClickZone(std::int32_t x, std::int32_t y);
+    
+    Event<bool> OnToggle;
+
+private:
+    friend class Core;
+
+    OverlayManager() = default;
+    OverlayManager(OverlayManager const& rhs) = delete;
+    OverlayManager& operator=(OverlayManager const& rhs) = delete;
+    OverlayManager(OverlayManager&& rhs) = delete;
+    OverlayManager& operator=(OverlayManager&& rhs) = delete;
+
+    IDiscordOverlayManager* internal_;
+    static IDiscordOverlayEvents events_;
+};
+
+class CPerlinNoiseCustom
+{  
+public:
+	CPerlinNoiseCustom(int seed) : mOctaves(2), mFrequency(1), mAmplitude(1), mSeed(seed), mReady(false);
+	void SetParams(int oct, float freq, float amp);
+	void SetOctaves(int oct);
+	void SetFrequency(float freq);
+	void SetAmplitude(float amp);
+  
+protected:
+  int mSeed;
+	bool mReady;
+	int mOctaves;
+	float mFrequency;
+	float mAmplitude;
+	xr_vector<float> mTimes;
+  int p[SAMPLE_SIZE + SAMPLE_SIZE + 2];
+};
+
+class CPerlinNoise1D : public CPerlinNoiseCustom
+{  
+public:
+	CPerlinNoise1D(int seed) : CPerlinNoiseCustom(seed) { mPrevContiniousTime = 0.0f; }
+	float Get(float x);
+	float GetContinious(float v);
+  
+private:
+	float noise(float arg);
+	void init();
+  
+  float g1[SAMPLE_SIZE + SAMPLE_SIZE + 2];
+	float mPrevContiniousTime;
+};
+
+class CPerlinNoise2D : public CPerlinNoiseCustom
+{
+public:
+	CPerlinNoise2D(int seed) : CPerlinNoiseCustom(seed);
+	float Get(float x, float y);
+  
+private:
+	float noise(const Fvector2& vec);
+	void normalize(float v[2]);  
+	void init();
+  
+  float g2[SAMPLE_SIZE + SAMPLE_SIZE + 2][2];
+};
+
+class CPerlinNoise3D : public CPerlinNoiseCustom
+{  
+public:
+	CPerlinNoise3D(int seed) : CPerlinNoiseCustom(seed);
+	float Get(float x, float y, float z);
+
+private:
+	float noise(const Fvector3& vec);
+	void normalize(float v[3]);  
+	void init();
+  
+  float g3[SAMPLE_SIZE + SAMPLE_SIZE + 2][3];
+};
+
+enum xrProperties
+{
+	xrPID_MARKER = 0,
+	xrPID_MATRIX,
+	xrPID_CONSTANT,
+	xrPID_TEXTURE,
+	xrPID_INTEGER,
+	xrPID_FLOAT,
+	xrPID_BOOL,
+	xrPID_TOKEN,
+	xrPID_CLSID,
+	xrPID_OBJECT,
+	xrPID_STRING,
+	xrPID_MARKER_TEMPLATE,
+	xrPID_FORCEDWORD = u32(-1)
+};
+
+struct xrP_Integer
+{
+	int value;
+	int min;
+	int max;
+
+	xrP_Integer() : value(0), min(0), max(255);
+};
+
+struct xrP_Float
+{
+	float value;
+	float min;
+	float max;
+
+	xrP_Float() : value(0), min(0), max(1);
+};
+
+struct xrP_BOOL
+{
+	BOOL value;
+
+	xrP_BOOL() : value(FALSE);
+};
+
+struct Item
+{
+  u32 ID;
+  string64 str;
+};
+
+struct xrP_TOKEN
+{
+	u32 IDselected;
+	u32 Count;
+
+	xrP_TOKEN() : IDselected(0), Count(0);
+};
+
+struct xrP_CLSID
+{
+	CLASS_ID Selected;
+	u32 Count;
+  
+	xrP_CLSID() : Selected(0), Count(0);
+};
+
+struct xrP_Template
+{
+	u32 Type;
+	u32 Limit;
+};
+
+class CPropertyBase
+{
+public:
+	virtual LPCSTR getName() = 0;
+	virtual LPCSTR getComment() = 0;
+	virtual void Save(IWriter& fs) = 0;
+	virtual void Load(IReader& fs, u16 version) = 0;
+};
+
+template <bool _is_pm, typename T>
+	friend struct xr_special_free;
+
+class CPS_Instance : public ISpatial, public ISheduled, public IRenderable 
+{
+public:
+	CPS_Instance(bool destroy_on_game_load);
+	const bool& destroy_on_game_load() const;
+	virtual void PSI_destroy();
+	BOOL PSI_alive();
+	BOOL PSI_IsAutomatic();
+	void PSI_SetLifeTime(float life_time);
+	virtual void Play(bool bHudMode) = 0;
+	virtual BOOL Locked();
+	virtual shared_str shedule_Name() const;
+	virtual void shedule_Update(u32 dt);
+	virtual IRenderable* dcast_Renderable();
+  
+private:
+  friend class IGame_Persistent;	
+	bool m_destroy_on_game_load;
+
+protected:
+	int m_iLifeTime;
+	BOOL m_bAutoRemove;
+	BOOL m_bDead;
+
+protected:
+	virtual ~CPS_Instance();
+	virtual void PSI_internal_delete();
+};
+
+class pVector : public Fvector
+{
+public:
+	pVector(float ax, float ay, float az) { set(ax, ay, az); }
+	pVector();
+	float length() const;
+	float length2() const;
+	float operator*(const pVector& a) const;
+	pVector operator*(const float s) const;
+	pVector operator/(const float s) const;
+	pVector operator+(const pVector& a) const;
+	pVector operator-(const pVector& a) const;
+	pVector operator-();
+	pVector& operator+=(const pVector& a);
+	pVector& operator-=(const pVector& a);
+	pVector& operator*=(const float a);
+	pVector& operator/=(const float a);
+	pVector& operator=(const pVector& a);
+	pVector operator^(const pVector& b) const;
+};
+
+struct Particle
+{
+  const u32 ANIMATE_CCW = (1 << 0);
+	pVector pos; // 12
+	pVector posB; // 12
+	pVector vel; // 12
+	pVector size; // 12
+	pVector rot; // 12 60
+	u32 color; // 4
+	float age; // 4
+	u16 frame; // 2
+	Flags16 flags; // 2
+};
+
+enum PDomainEnum
+{
+	PDPoint = 0,
+	PDLine = 1,
+	PDTriangle = 2,
+	PDPlane = 3,
+	PDBox = 4,
+	PDSphere = 5,
+	PDCylinder = 6,
+	PDCone = 7,
+	PDBlob = 8,
+	PDDisc = 9,
+	PDRectangle = 10,
+	domain_enum_force_dword = u32(-1)
+};
+
+enum PActionEnum
+{
+	PAAvoidID,
+	PABounceID,
+	PACallActionListID_obsolette,
+	PACopyVertexBID,.
+	PADampingID,
+	PAExplosionID,
+	PAFollowID,
+	PAGravitateID,
+	PAGravityID,
+	PAJetID,
+	PAKillOldID,
+	PAMatchVelocityID,
+	PAMoveID,
+	PAOrbitLineID,
+	PAOrbitPointID,
+	PARandomAccelID,
+	PARandomDisplaceID,
+	PARandomVelocityID,
+	PARestoreID,
+	PASinkID,
+	PASinkVelocityID,
+	PASourceID,
+	PASpeedLimitID,
+	PATargetColorID,
+	PATargetSizeID,
+	PATargetRotateID,
+	PATargetRotateDID,
+	PATargetVelocityID,
+	PATargetVelocityDID,
+	PAVortexID,
+	PATurbulenceID,
+	PAScatterID,
+	action_enum_force_dword = u32(-1)
+};
+
+class IParticleManager
+{
+public:
+	IParticleManager();
+	virtual ~IParticleManager();
+	virtual int CreateEffect(u32 max_particles) = 0;
+	virtual void DestroyEffect(int effect_id) = 0;
+	virtual int CreateActionList() = 0;
+	virtual void DestroyActionList(int alist_id) = 0;
+	virtual void PlayEffect(int effect_id, int alist_id) = 0;
+	virtual void StopEffect(int effect_id, int alist_id, BOOL deffered = TRUE) = 0;
+	virtual void Update(int effect_id, int alist_id, float dt) = 0;
+	virtual void Render(int effect_id) = 0;
+	virtual void Transform(int alist_id, const Fmatrix& m, const Fvector& velocity) = 0;
+	virtual void RemoveParticle(int effect_id, u32 p_id) = 0;
+	virtual void SetMaxParticles(int effect_id, u32 max_particles) = 0;
+	virtual void SetCallback(int effect_id, OnBirthParticleCB b, OnDeadParticleCB d, void* owner, u32 param) = 0;
+	virtual void GetParticles(int effect_id, Particle*& particles, u32& cnt) = 0;
+	virtual u32 GetParticlesCount(int effect_id) = 0;
+	virtual ParticleAction* CreateAction(PActionEnum type) = 0;
+	virtual u32 LoadActions(int alist_id, IReader& R) = 0;
+	virtual void SaveActions(int alist_id, IWriter& W) = 0;
+};
+
+struct _REG_INFO
+{
+	void* Object;
+	int Prio;
+	u32 Flags;
+};
+
+struct
+{
+  u32 in_process : 1;
+  u32 changed : 1;
+};
+
+template <class T>
+class CRegistrator
+{
+public:
+	xr_vector<_REG_INFO> R;
+  
+	CRegistrator();
+	void Add(T* obj, int priority = REG_PRIORITY_NORMAL, u32 flags = 0);
+	void Remove(T* obj);
+	void Process(RP_FUNC* f);
+	void Resort(void);
+  
+private:
+	static int __cdecl _REG_Compare(const void* e1, const void* e2);
+};
+
+class pure_relcase
+{  
+public:
+	template <typename class_type>
+	pure_relcase(void (xr_stdcall class_type::* function_to_bind)(CObject*));
+	virtual ~pure_relcase();
+  
+private:
+	int m_ID;
+};
+
+struct Item
+{
+  Fvector P;
+  Fvector Phit;
+  Fvector D;
+  float fSpeed;
+  u32 dwTime_Life;
+  u32 dwTime_Hit;
+  u32 uv_set;
+
+  void invalidate();
+};
+
+struct Particle
+{
+  Particle *next, *prev;
+  Fmatrix mXForm;
+  Fsphere bounds;
+  float time;
+};
+
+enum States
+{
+  stIdle = 0,
+  stWorking
+};
+
+class CEffect_Rain
+{  
+public:
+	CEffect_Rain();
+	~CEffect_Rain();
+	void Render();
+	void OnFrame();
+	void InvalidateState();
+	float GetRainVolume();
+	float GetRainHemi();
+  
+private:
+	FactoryPtr<IRainRender> m_pRender;
+	xr_vector<Item> items;
+	States state;
+	xr_vector<Particle> particle_pool;
+	Particle* particle_active;
+	Particle* particle_idle;
+	ref_sound snd_Ambient;
+	float rain_volume;
+	float rain_hemi = 0.0f;
+  CPerlinNoise1D* RainPerlin;
+  friend class dxRainRender;
+  
+private:
+	void p_create();
+	void p_destroy();
+	void p_remove(Particle* P, Particle*& LST);
+	void p_insert(Particle* P, Particle*& LST);
+	int p_size(Particle* LST);
+	Particle* p_allocate();
+	void p_free(Particle* P);
+	void Born(Item& dest, float radius, float speed);
+	void Hit(Fvector& pos);
+	BOOL RayPick(const Fvector& s, const Fvector& d, float& range, collide::rq_target tgt);
+	void RenewItem(Item& dest, float height, BOOL bHit);
+	void Prepare(Fvector2& offset, Fvector3& axis, float Wind_Vel, float Wind_Dir);
+};
+
+class RelationshipEvents final 
+{
+public:
+    static void OnRefresh(void* callbackData);
+    static void OnRelationshipUpdate(void* callbackData, DiscordRelationship* relationship);
+};
+
+class RelationshipManager final 
+{
+public:
+    ~RelationshipManager() = default;
+
+    void Filter(std::function<bool(Relationship const&)> filter);
+    Result Count(std::int32_t* count);
+    Result Get(UserId userId, Relationship* relationship);
+    Result GetAt(std::uint32_t index, Relationship* relationship);
+
+    Event<> OnRefresh;
+    Event<Relationship const&> OnRelationshipUpdate;
+
+private:
+    friend class Core;
+
+    RelationshipManager() = default;
+    RelationshipManager(RelationshipManager const& rhs) = delete;
+    RelationshipManager& operator=(RelationshipManager const& rhs) = delete;
+    RelationshipManager(RelationshipManager&& rhs) = delete;
+    RelationshipManager& operator=(RelationshipManager&& rhs) = delete;
+
+    IDiscordRelationshipManager* internal_;
+    static IDiscordRelationshipEvents events_;
+};
+
+enum LT
+{
+  DIRECT = 0,
+  POINT = 1,
+  SPOT = 2,
+  OMNIPART = 3,
+  REFLECTED = 4,
+};
+
+class IRender_Light : public xr_resource
+{
+public:
+	virtual void set_type(LT type) = 0;
+	virtual void set_active(bool) = 0;
+	virtual bool get_active() = 0;
+	virtual void set_shadow(bool) = 0;
+	virtual void set_volumetric(bool) = 0;
+	virtual void set_volumetric_quality(float) = 0;
+	virtual void set_volumetric_intensity(float) = 0;
+	virtual void set_volumetric_distance(float) = 0;
+
+	virtual void set_indirect(bool);
+	virtual void set_position(const Fvector& P) = 0;
+	virtual void set_rotation(const Fvector& D, const Fvector& R) = 0;
+	virtual void set_cone(float angle) = 0;
+	virtual void set_range(float R) = 0;
+	virtual void set_virtual_size(float R) = 0;
+	virtual void set_texture(LPCSTR name) = 0;
+	virtual void set_color(const Fcolor& C) = 0;
+	virtual void set_color(float r, float g, float b) = 0;
+	virtual void set_hud_mode(bool b) = 0;
+	virtual bool get_hud_mode() = 0;
+	virtual ~IRender_Light();
+};
+
+struct resptrcode_light : public resptr_base<IRender_Light>
+{
+	void destroy();
+};
+
+typedef resptr_core<IRender_Light, resptrcode_light> ref_light;
+
+class IRender_Glow : public xr_resource
+{
+public:
+	virtual void set_active(bool) = 0;
+	virtual bool get_active() = 0;
+	virtual void set_position(const Fvector& P) = 0;
+	virtual void set_direction(const Fvector& P) = 0;
+	virtual void set_radius(float R) = 0;
+	virtual void set_texture(LPCSTR name) = 0;
+	virtual void set_color(const Fcolor& C) = 0;
+	virtual void set_color(float r, float g, float b) = 0;
+	virtual ~IRender_Glow();
+};
+
+struct resptrcode_glow : public resptr_base<IRender_Glow>
+{
+	void destroy();
+};
+
+typedef resptr_core<IRender_Glow, resptrcode_glow> ref_glow;
+
+enum mode
+{
+  TRACE_LIGHTS = (1 << 0),
+  TRACE_SUN = (1 << 1),
+  TRACE_HEMI = (1 << 2),
+  TRACE_ALL = (TRACE_LIGHTS | TRACE_SUN | TRACE_HEMI),
+};
+
+class IRender_ObjectSpecific
+{
+public:
+	virtual void force_mode(u32 mode) = 0;
+	virtual float get_luminocity() = 0;
+	virtual float get_luminocity_hemi() = 0;
+	virtual float* get_luminocity_hemi_cube() = 0;
+	virtual ~IRender_ObjectSpecific();
+};
+
+class IRender_Portal
+{
+public:
+	virtual ~IRender_Portal();
+};
+
+class IRender_Sector
+{
+public:
+	virtual ~IRender_Sector();
+};
+
+class IRender_Target
+{
+public:
+	virtual void set_blur(float f) = 0;
+	virtual void set_gray(float f) = 0;
+	virtual void set_duality_h(float f) = 0;
+	virtual void set_duality_v(float f) = 0;
+	virtual void set_noise(float f) = 0;
+	virtual void set_noise_scale(float f) = 0;
+	virtual void set_noise_fps(float f) = 0;
+	virtual void set_color_base(u32 f) = 0;
+	virtual void set_color_gray(u32 f) = 0;
+	virtual void set_color_add(const Fvector& f) = 0;
+	virtual u32 get_width() = 0;
+	virtual u32 get_height() = 0;
+	virtual void set_cm_imfluence(float f) = 0;
+	virtual void set_cm_interpolate(float f) = 0;
+	virtual void set_cm_textures(const shared_str& tex0, const shared_str& tex1) = 0;
+	virtual ~IRender_Target();
+};
+
+enum GenerationLevel
+{
+  GENERATION_R1 = 81,
+  GENERATION_DX81 = 81,
+  GENERATION_R2 = 90,
+  GENERATION_DX90 = 90,
+  GENERATION_forcedword = u32(-1)
+};
+
+enum ScreenshotMode
+{
+  SM_NORMAL = 0,
+  SM_FOR_CUBEMAP = 1,
+  SM_FOR_GAMESAVE = 2,
+  SM_FOR_LEVELMAP = 3,
+  SM_FOR_MPSENDING = 4,
+  SM_forcedword = u32(-1)
+};
+
+enum RRT
+{
+  rtPDA = 1,
+  rtSVP,
+};
+
+class IRender_interface
+{
+public:
+	bool hud_loading;
+	s32 m_skinning;
+	s32 m_MSAASample;
+	CFrustum ViewBase;
+	CFrustum* View;
+  
+public:
+	virtual GenerationLevel get_generation() = 0;
+	virtual bool is_sun_static() = 0;
+	virtual DWORD get_dx_level() = 0;
+	virtual void create() = 0;
+	virtual void destroy() = 0;
+	virtual void reset_begin() = 0;
+	virtual void reset_end() = 0;
+	virtual void level_Load(IReader*) = 0;
+	virtual void level_Unload() = 0;
+	void shader_option_skinning(s32 mode) { m_skinning = mode; }
+	virtual HRESULT shader_compile(LPCSTR name,	DWORD const* pSrcData, UINT SrcDataLen, LPCSTR pFunctionName, LPCSTR pTarget, DWORD Flags, void*& result) = 0;
+	virtual void Statistics(CGameFont* F);
+	virtual LPCSTR getShaderPath() = 0;
+	virtual IRender_Sector* getSector(int id) = 0;
+	virtual IRenderVisual* getVisual(int id) = 0;
+	virtual IRender_Sector* detectSector(const Fvector& P) = 0;
+	virtual IRender_Target* getTarget() = 0;
+	void set_Frustum(CFrustum* O);
+	virtual void set_Transform(Fmatrix* M) = 0;
+	virtual void set_HUD(BOOL V) = 0;
+	virtual BOOL get_HUD() = 0;
+	virtual void set_Invisible(BOOL V) = 0;
+	virtual void flush() = 0;
+	virtual void set_Object(IRenderable* O) = 0;
+	virtual void add_Occluder(Fbox2& bb_screenspace) = 0; // mask screen region as oclluded (-1..1, -1..1)
+	virtual void add_Visual(IRenderVisual* V) = 0; // add visual leaf (no culling performed at all)
+	virtual void add_Geometry(IRenderVisual* V) = 0; // add visual(s) (all culling performed)
+	virtual void add_StaticWallmark(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V) = 0;
+	virtual void add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, float ttl = 0.f, bool ignore_opt = false, bool random_rotation = true) = 0;
+	virtual void add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, float ttl, bool ignore_opt, float rotation) = 0;
+	virtual void clear_static_wallmarks() = 0;
+	virtual void add_SkeletonWallmark(const Fmatrix* xf, IKinematics* obj, IWallMarkArray* pArray, const Fvector& start, const Fvector& dir, float size, float ttl = 0.f, bool ignore_opt = false) = 0;
+	virtual IRender_ObjectSpecific* ros_create(IRenderable* parent) = 0;
+	virtual void ros_destroy(IRender_ObjectSpecific*&) = 0;
+	virtual IRender_Light* light_create() = 0;
+	virtual void light_destroy(IRender_Light* p_);
+	virtual IRender_Glow* glow_create() = 0;
+	virtual void glow_destroy(IRender_Glow* p_);
+	virtual IRenderVisual* model_CreateParticles(LPCSTR name) = 0;
+	virtual IRenderVisual* model_Create(LPCSTR name, IReader* data = 0) = 0;
+	virtual IRenderVisual* model_CreateChild(LPCSTR name, IReader* data) = 0;
+	virtual IRenderVisual* model_Duplicate(IRenderVisual* V) = 0;
+	virtual void model_Delete(IRenderVisual*& V, BOOL bDiscard = FALSE) = 0;
+	virtual void model_Logging(BOOL bEnable) = 0;
+	virtual void models_Prefetch() = 0;
+	virtual void models_PrefetchOne(LPCSTR name) = 0;
+	virtual void models_Clear(BOOL b_complete) = 0;
+	virtual BOOL occ_visible(vis_data& V) = 0;
+	virtual BOOL occ_visible(Fbox& B) = 0;
+	virtual BOOL occ_visible(sPoly& P) = 0;
+	virtual void Calculate() = 0;
+	virtual void Render() = 0;
+	virtual void Screenshot(ScreenshotMode mode = SM_NORMAL, LPCSTR name = 0) = 0;
+	virtual void Screenshot(ScreenshotMode mode, CMemoryWriter& memory_writer) = 0;
+	virtual void ScreenshotAsyncBegin() = 0;
+	virtual void ScreenshotAsyncEnd(CMemoryWriter& memory_writer) = 0;
+	virtual void ExportParticles();
+	virtual void ImportParticles();
+	virtual void rmNear() = 0;
+	virtual void rmFar() = 0;
+	virtual void rmNormal() = 0;
+	virtual u32 memory_usage() = 0;
+	virtual u32 active_phase() = 0; //Swartz: actor shadow
+	virtual void RenderToTarget(RRT target) = 0;
+	virtual ~IRender_interface();
+  
+protected:
+	virtual void ScreenshotImpl(ScreenshotMode mode, LPCSTR name, CMemoryWriter* memory_writer) = 0;
+};
+
+enum
+{
+  flCollision = 1 << 0,
+  flRendering = 1 << 1,
+  flOptimizeUV = 1 << 2,
+  flLIGHT_Vertex = 1 << 3,
+  flLIGHT_CastShadow = 1 << 4,
+  flLIGHT_Sharp = 1 << 5,
+};
+
+struct ShaderXrLcFlags
+{
+  u32 bCollision : 1;
+  u32 bRendering : 1;
+  u32 bOptimizeUV : 1;
+  u32 bLIGHT_Vertex : 1;
+  u32 bLIGHT_CastShadow : 1;
+  u32 bLIGHT_Sharp : 1;
+};
+
+struct Shader_xrLC
+{
+public:
+	char Name[128];
+	union
+	{
+		Flags32 m_Flags;
+		Flags flags;
+	};
+
+	float vert_translucency;
+	float vert_ambient;
+	float lm_density;
+
+	Shader_xrLC();
+};
+
+DEFINE_VECTOR(Shader_xrLC, Shader_xrLCVec, Shader_xrLCIt);
+
+class Shader_xrLC_LIB
+{  
+public:
+	void Load(LPCSTR name);
+	bool Save(LPCSTR name);
+	void Unload();
+	u32 GetID(LPCSTR name);
+	Shader_xrLC* Get(LPCSTR name);
+	Shader_xrLC* Get(int id);
+	Shader_xrLC* Append(Shader_xrLC* parent = 0);
+	void Remove(LPCSTR name);
+	void Remove(int id);
+	Shader_xrLCVec& Library();
+  
+private:
+	Shader_xrLCVec library;
+};
+
+class ShadersExternalData-
+{
+public:
+	Fmatrix m_script_params;
+	Fvector4 hud_params;     // [zoom_rotate_factor, secondVP_zoom_factor, hud_fov, NULL]
+	Fvector4 hud_fov_params; // [scope_zoom_factor, min_scope_zoom_factor, NULL, NULL]
+	Fvector4 m_blender_mode; // x\y = [0 - default, 1 - night vision, 2 - thermo vision, ... ñì. common.h]
+
+	ShadersExternalData();
+}; 
+
+enum
+{
+	flTKeyPresent = (1 << 0),
+	flRKeyAbsent = (1 << 1),
+	flTKey16IsBit = (1 << 2),
+};
+
+struct CKey
+{
+	Fquaternion Q; // rotation
+	Fvector T; // translation
+};
+
+struct CKeyQR
+{
+	s16 x, y, z, w; // rotation
+};
+
+struct CKeyQT8
+{
+	s8 x1, y1, z1;
+};
+
+struct CKeyQT16
+{
+	s16 x1, y1, z1;
+};
+
+class CMotion
+{
+public:
+	ref_smem<CKeyQR> _keysR;
+	ref_smem<CKeyQT8> _keysT8;
+	ref_smem<CKeyQT16> _keysT16;
+	Fvector _initT;
+	Fvector _sizeT;
+  
+public:
+	void set_flags(u8 val);
+	void set_flag(u8 mask, u8 val);
+	BOOL test_flag(u8 mask) const;
+	void set_count(u32 cnt);
+	u32 get_count() const;
+	float GetLength();
+	u32 mem_usage();
+  
+private:
+  u32 _flags : 8;
+  u32 _count : 24;
+};
+
+class motion_marks
+{
+public:
+	typedef std::pair<float, float> interval;
+	shared_str name;
+  
+public:
+	void Load(IReader*);
+	bool is_empty() const;
+	const interval* pick_mark(float const& t) const;
+	bool is_mark_between(float const& t0, float const& t1) const;
+	float time_to_next_mark(float time) const;
+  
+private:
+	typedef xr_vector<interval> STORAGE;
+	typedef STORAGE::iterator ITERATOR;
+	typedef STORAGE::const_iterator C_ITERATOR;
+	STORAGE intervals;
+};
+
+class CMotionDef
+{
+public:
+	u16 bone_or_part;
+	u16 motion;
+	u16 speed; // quantized: 0..10
+	u16 power; // quantized: 0..10
+	u16 accrue; // quantized: 0..10
+	u16 falloff; // quantized: 0..10
+	u16 flags;
+	xr_vector<motion_marks> marks;
+
+	IC float Dequantize(u16 V) const;
+	IC u16 Quantize(float V) const;
+	void Load(IReader* MP, u32 fl, u16 vers);
+	u32 mem_usage();
+	float Accrue();
+	float Falloff();
+	float Speed();
+	float Power();
+	bool StopAtEnd();
+};
+
+struct accel_str_pred : public std::binary_function<shared_str, shared_str, bool>
+{
+	bool operator()(const shared_str& x, const shared_str& y) const ;
+};
+
+typedef xr_map<shared_str, u16, accel_str_pred> accel_map;
+DEFINE_VECTOR(CMotionDef, MotionDefVec, MotionDefVecIt);
+DEFINE_VECTOR(CMotion, MotionVec, MotionVecIt);
+DEFINE_VECTOR(MotionVec*, BoneMotionsVec, BoneMotionsVecIt);
+DEFINE_MAP(shared_str, MotionVec, BoneMotionMap, BoneMotionMapIt);
+
+class CPartDef
+{
+public:
+	shared_str Name;
+	xr_vector<u32> bones;
+	CPartDef() : Name(0);
+	u32 mem_usage();
+};
+
+class CPartition
+{  
+public:
+	CPartDef& operator[](u16 id);
+	const CPartDef& part(u16 id) const;
+	u16 part_id(const shared_str& name) const;
+	u32 mem_usage();
+	void load(IKinematics* V, LPCSTR model_name);
+	u8 count() const;
+  
+private:
+	CPartDef P[MAX_PARTS];
+};
+
+struct motions_value
+{
+	accel_map m_motion_map; // motion associations
+	accel_map m_cycle; // motion data itself (shared)
+	accel_map m_fx; // motion data itself (shared)
+	CPartition m_partition; // partition
+	u32 m_dwReference;
+	BoneMotionMap m_motions;
+	MotionDefVec m_mdefs;
+	shared_str m_id;
+
+	BOOL load(LPCSTR N, IReader* data, vecBones* bones);
+	MotionVec* bone_motions(shared_str bone_name);
+	u32 mem_usage();
+};
+
+class motions_container
+{  
+public:
+	motions_container();
+	~motions_container();
+	bool has(shared_str key);
+	motions_value* dock(shared_str key, IReader* data, vecBones* bones);
+	void dump();
+	void clean(bool force_destroy);
+  
+private:
+	DEFINE_MAP(shared_str, motions_value*, SharedMotionsMap, SharedMotionsMapIt);
+	SharedMotionsMap container;
+};
+
+class shared_motions
+{
+public:
+	bool create(shared_str key, IReader* data, vecBones* bones);
+	bool create(shared_motions const& rhs);
+	shared_motions();
+	shared_motions(shared_motions const& rhs);
+	~shared_motions();
+	shared_motions& operator=(shared_motions const& rhs);
+	bool operator==(shared_motions const& rhs) const;
+	MotionVec* bone_motions(const shared_str& bone_name);
+	accel_map* motion_map();
+	accel_map* cycle();
+	accel_map* fx();
+	CPartition* partition();
+	MotionDefVec* motion_defs();
+	CMotionDef* motion_def(u16 idx);
+	const shared_str& id() const;
+  
+private:
+	motions_value* p_;
+  
+protected:
+	void destroy();
+};
+
+struct SMarker
+{
+  EStyle m_eStyle;
+  float m_fPos;
+  u32 m_dwColor;
+};
+
+enum EStyle
+{
+  stBar,
+  stCurve,
+  stBarLine,
+  stPoint,
+  stVert,
+  stHor,
+};
+
+struct SSubGraph
+{
+  EStyle style;
+  ElementsDeq elements;
+  SSubGraph(EStyle s);
+  void SetStyle(EStyle s);
+};
+
+struct SElement
+{
+  u32 color;
+  float data;
+
+  SElement(float d, u32 clr);
+};
+
+class CStatGraph : public pureRender
+{
+public:
+	CStatGraph();
+	~CStatGraph();
+	virtual void OnRender();
+	void OnDeviceCreate();
+	void OnDeviceDestroy();
+	void SetStyle(EStyle s, u32 SubGraphID = 0);
+	void SetRect(int l, int t, int w, int h, u32 rect_clr, u32 back_clr);
+	void SetGrid(int w_div, float w_step, int h_div, float h_step, u32 grid_clr, u32 base_clr);
+	void SetMinMax(float _mn, float _mx, u32 item_count);
+	void AppendItem(float d, u32 clr, u32 SubGraphID = 0);	
+  u32 AppendSubGraph(EStyle S);
+	void AddMarker(EStyle Style, float pos, u32 Color);
+	const SMarker& Marker(u32 ID);
+	void UpdateMarkerPos(u32 ID, float NewPos);
+	void ClearMarkers();
+	void RemoveMarker(u32 ID);
+  
+protected:
+	DEFINE_DEQUE(SElement, ElementsDeq, ElementsDeqIt);
+	DEFINE_VECTOR(SSubGraph, SubGraphVec, SubGraphVecIt);
+	SubGraphVec subgraphs;
+	float mn, mx;
+	u32 max_item_count;
+	Ivector2 lt, rb;
+	Ivector2 grid;
+	Fvector2 grid_step;
+	u32 grid_color;
+	u32 base_color;
+	u32 rect_color;
+	u32 back_color;
+	FactoryPtr<IStatGraphRender> m_pRender;
+	DEFINE_DEQUE(SMarker, MarkersDeq, MarkersDeqIt);
+	MarkersDeq m_Markers;
+  
+private:
+	friend class dxStatGraphRender;
+};
+
+class optimizer
+{
+public:
+	optimizer();
+	BOOL enabled();
+	void enable();
+	void disable();
+	void update(float value);
+  
+private:
+	float average_;
+	BOOL enabled_;  
+};
+
+class CStatsPhysics
+{
+public:
+	CStatTimer ph_collision; // collision
+	CStatTimer ph_core; // integrate
+	CStatTimer Physics; // movement+collision
+};
+
+class ENGINE_API CStats :	public pureRender, public CStatsPhysics
+{
+public:
+	CGameFont* pFont;
+	float fFPS, fRFPS, fTPS; // FPS, RenderFPS, TPS
+	float fMem_calls;
+	u32 dwMem_calls;
+	u32 dwSND_Played, dwSND_Allocated; // Play/Alloc
+	float fShedulerLoad;
+	CStatTimer EngineTOTAL; //
+	CStatTimer Sheduler; //
+	CStatTimer UpdateClient; //
+	u32 UpdateClient_updated; //
+	u32 UpdateClient_crows; //
+	u32 UpdateClient_active; //
+	u32 UpdateClient_total; //
+	u32 Particles_starting; // starting
+	u32 Particles_active; // active
+	u32 Particles_destroy; // destroying
+	CStatTimer AI_Think; // thinking
+	CStatTimer AI_Range; // query: range
+	CStatTimer AI_Path; // query: path
+	CStatTimer AI_Node; // query: node
+	CStatTimer AI_Vis; // visibility detection - total
+	CStatTimer AI_Vis_Query; // visibility detection - portal traversal and frustum culling
+	CStatTimer AI_Vis_RayTests; // visibility detection - ray casting
+	CStatTimer RenderTOTAL; //
+	CStatTimer RenderTOTAL_Real;
+	CStatTimer RenderCALC; // portal traversal, frustum culling, entities "renderable_Render"
+	CStatTimer RenderCALC_HOM; // HOM rendering
+	CStatTimer Animation; // skeleton calculation
+	CStatTimer RenderDUMP; // actual primitive rendering
+	CStatTimer RenderDUMP_Wait; // ...waiting something back (queries results, etc.)
+	CStatTimer RenderDUMP_Wait_S; // ...frame-limit sync
+	CStatTimer RenderDUMP_RT; // ...render-targets
+	CStatTimer RenderDUMP_SKIN; // ...skinning
+	CStatTimer RenderDUMP_HUD; // ...hud rendering
+	CStatTimer RenderDUMP_Glows; // ...glows vis-testing,sorting,render
+	CStatTimer RenderDUMP_Lights; // ...d-lights building/rendering
+	CStatTimer RenderDUMP_WM; // ...wallmark sorting, rendering
+	u32 RenderDUMP_WMS_Count; // ...number of static wallmark
+	u32 RenderDUMP_WMD_Count; // ...number of dynamic wallmark
+	u32 RenderDUMP_WMT_Count; // ...number of wallmark tri
+	CStatTimer RenderDUMP_DT_VIS; // ...details visibility detection
+	CStatTimer RenderDUMP_DT_Render; // ...details rendering
+	CStatTimer RenderDUMP_DT_Cache; // ...details slot cache access
+	u32 RenderDUMP_DT_Count; // ...number of DT-elements
+	CStatTimer RenderDUMP_Pcalc; // ...projectors building
+	CStatTimer RenderDUMP_Scalc; // ...shadows building
+	CStatTimer RenderDUMP_Srender; // ...shadows render
+	CStatTimer Sound; // total time taken by sound subsystem (accurate only in single-threaded mode)
+	CStatTimer Input; // total time taken by input subsystem (accurate only in single-threaded mode)
+	CStatTimer clRAY; // total: ray-testing
+	CStatTimer clBOX; // total: box query
+	CStatTimer clFRUSTUM; // total: frustum query
+	CStatTimer netClient1;
+	CStatTimer netClient2;
+	CStatTimer netServer;
+	CStatTimer netClientCompressor;
+	CStatTimer netServerCompressor;
+	CStatTimer TEST0; // debug counter
+	CStatTimer TEST1; // debug counter
+	CStatTimer TEST2; // debug counter
+	CStatTimer TEST3; // debug counter
+	shared_str eval_line_1;
+	shared_str eval_line_2;
+	shared_str eval_line_3;
+	xr_vector<shared_str> errors;
+	CRegistrator<pureStats> seqStats;
+  
+public:
+	CStats();
+	~CStats();
+  void Show(void);
+	virtual void OnRender();
+	void OnDeviceCreate(void);
+	void OnDeviceDestroy(void);
+	IC CGameFont* Font() { return pFont; }
+
+private:
+	FactoryPtr<IStatsRender> m_pRender;
+};
+
+enum
+{
+	st_sound = (1 << 0),
+	st_sound_min_dist = (1 << 1),
+	st_sound_max_dist = (1 << 2),
+	st_sound_ai_dist = (1 << 3),
+	st_sound_info_name = (1 << 4),
+	st_sound_info_object = (1 << 5),
+};
+
+class StorageManager final 
+{
+public:
+  ~StorageManager() = default;
+  Result Read(char const* name, std::uint8_t* data, std::uint32_t dataLength, std::uint32_t* read);
+  void ReadAsync(char const* name, std::function<void(Result, std::uint8_t*, std::uint32_t)> callback);
+  void ReadAsyncPartial(char const* name, std::uint64_t offset, std::uint64_t length, std::function<void(Result, std::uint8_t*, std::uint32_t)> callback);
+  Result Write(char const* name, std::uint8_t* data, std::uint32_t dataLength);
+  void WriteAsync(char const* name, std::uint8_t* data, std::uint32_t dataLength, std::function<void(Result)> callback);
+  Result Delete(char const* name);
+  Result Exists(char const* name, bool* exists);
+  void Count(std::int32_t* count);
+  Result Stat(char const* name, FileStat* stat);
+  Result StatAt(std::int32_t index, FileStat* stat);
+  Result GetPath(char path[4096]);
+
+private:
+  friend class Core;
+
+  StorageManager() = default;
+  StorageManager(StorageManager const& rhs) = delete;
+  StorageManager& operator=(StorageManager const& rhs) = delete;
+  StorageManager(StorageManager&& rhs) = delete;
+  StorageManager& operator=(StorageManager&& rhs) = delete;
+
+  IDiscordStorageManager* internal_;
+  static IDiscordStorageEvents events_;
+};
+
+class StoreEvents final 
+{
+public:
+  static void OnEntitlementCreate(void* callbackData, DiscordEntitlement* entitlement);
+  static void OnEntitlementDelete(void* callbackData, DiscordEntitlement* entitlement);
+};
+
+class StoreManager final 
+{
+public:
+  ~StoreManager() = default;
+
+  void FetchSkus(std::function<void(Result)> callback);
+  void CountSkus(std::int32_t* count);
+  Result GetSku(Snowflake skuId, Sku* sku);
+  Result GetSkuAt(std::int32_t index, Sku* sku);
+  void FetchEntitlements(std::function<void(Result)> callback);
+  void CountEntitlements(std::int32_t* count);
+  Result GetEntitlement(Snowflake entitlementId, Entitlement* entitlement);
+  Result GetEntitlementAt(std::int32_t index, Entitlement* entitlement);
+  Result HasSkuEntitlement(Snowflake skuId, bool* hasEntitlement);
+  void StartPurchase(Snowflake skuId, std::function<void(Result)> callback);
+
+  Event<Entitlement const&> OnEntitlementCreate;
+  Event<Entitlement const&> OnEntitlementDelete;
+
+private:
+  friend class Core;
+
+  StoreManager() = default;
+  StoreManager(StoreManager const& rhs) = delete;
+  StoreManager& operator=(StoreManager const& rhs) = delete;
+  StoreManager(StoreManager&& rhs) = delete;
+  StoreManager& operator=(StoreManager&& rhs) = delete;
+
+  IDiscordStoreManager* internal_;
+  static IDiscordStoreEvents events_;
+};
+
+class CTextConsole : public CConsole
+{
+public:
+	CTextConsole();
+	virtual ~CTextConsole();
+	virtual void Initialize();
+	virtual void Destroy();
+	virtual void OnRender();
+	virtual void _BCL OnFrame();
+  void CreateConsoleWnd();
+	void CreateLogWnd();
+  void DrawLog(HDC hDC, RECT* pRect);
+	void AddString(LPCSTR string);
+	void OnPaint();
+  
+private:
+	typedef CConsole inherited;
+
+	HWND* m_pMainWnd;
+	HWND m_hConsoleWnd;
+	HWND m_hLogWnd;  
+	bool m_bScrollLog;
+	u32 m_dwStartLine;
+	HFONT m_hLogWndFont;
+	HFONT m_hPrevFont;
+	HBRUSH m_hBackGroundBrush;
+	HDC m_hDC_LogWnd;
+	HDC m_hDC_LogWnd_BackBuffer;
+	HBITMAP m_hBB_BM, m_hOld_BM;
+	bool m_bNeedUpdate;
+	u32 m_dwLastUpdateTime;
+	u32 m_last_time;
+	CServerInfo m_server_info;
+};
+
+struct SFlare
+{
+  float fOpacity;
+  Fvector2 fRadius;
+  shared_str texture;
+  shared_str shader;
+  FactoryPtr<IFlareRender> m_pFlare;
+
+  SFlare();
+};
+
+struct SThunderboltDesc
+{
+public:
+	FactoryPtr<IThunderboltDescRender> m_pRender;
+	ref_sound snd;
+	SFlare* m_GradientTop;
+	SFlare* m_GradientCenter;
+	shared_str name;
+	CLAItem* color_anim;
+  
+public:
+	SThunderboltDesc();
+	~SThunderboltDesc();
+	void load(CInifile& pIni, shared_str const& sect);
+	void create_top_gradient(CInifile& pIni, shared_str const& sect);
+	void create_center_gradient(CInifile& pIni, shared_str const& sect);
+};
+
+struct SThunderboltCollection
+{
+public:
+	DEFINE_VECTOR(SThunderboltDesc*, DescVec, DescIt);
+	DescVec palette;
+	shared_str section;
+  
+public:
+	SThunderboltCollection();
+	~SThunderboltCollection();
+	void load(CInifile* pIni, CInifile* thunderbolts, LPCSTR sect);
+	SThunderboltDesc* GetRandomDesc();
+};
+
+enum EState
+{
+  stIdle,
+  stWorking
+};
+
+class CEffect_Thunderbolt
+{  
+public:
+	CEffect_Thunderbolt();
+	~CEffect_Thunderbolt();
+	void OnFrame(shared_str id, float period, float duration);
+	void Render();
+	shared_str AppendDef(CEnvironment& environment, CInifile* pIni, CInifile* thunderbolts, LPCSTR sect);
+
+protected:
+	DEFINE_VECTOR(SThunderboltCollection*, CollectionVec, CollectionVecIt);
+	CollectionVec collection;
+	SThunderboltDesc* current;  
+
+private:
+  friend class dxThunderboltRender;
+
+	Fmatrix current_xform;
+	Fvector3 current_direction;
+	FactoryPtr<IThunderboltRender> m_pRender;
+	EState state;
+	Fvector lightning_center;
+	float lightning_size;
+	float lightning_phase;
+	float life_time;
+	float current_time;
+	float next_lightning_time;
+	BOOL bEnabled;
+
+private:
+	BOOL RayPick(const Fvector& s, const Fvector& d, float& range);
+	void Bolt(shared_str id, float period, float life_time);
+};
+
+typedef struct
+{
+	FOURCC fccType;
+	FOURCC fccHandler;
+	DWORD dwFlags;
+	DWORD dwPriority;
+	DWORD dwInitialFrames;
+	DWORD dwScale;
+	DWORD dwRate;
+	DWORD dwStart;
+	DWORD dwLength;
+	DWORD dwSuggestedBufferSize;
+	DWORD dwQuality;
+	DWORD dwSampleSize;
+
+	struct
+	{
+		WORD left;
+		WORD top;
+		WORD right;
+		WORD bottom;
+	};
+} AVIStreamHeaderCustom;
+
+class CAviPlayerCustom
+{
+public:
+  DWORD m_dwWidth, m_dwHeight;
+
+public:
+	CAviPlayerCustom();
+	~CAviPlayerCustom();
+	VOID GetSize(DWORD* dwWidth, DWORD* dwHeight);
+	BOOL Load(char* fname);
+	BOOL GetFrame(BYTE** pDest);
+	BOOL NeedUpdate();
+	INT SetSpeed(INT nPercent);
+  
+protected:
+	CAviPlayerCustom* alpha;
+	AVIINDEXENTRY* m_pMovieIndex;
+	BYTE* m_pMovieData;
+	HIC m_aviIC;
+	BYTE* m_pDecompressedBuf;
+	BITMAPINFOHEADER m_biOutFormat;
+	BITMAPINFOHEADER m_biInFormat;
+	float m_fRate; // стандартная скорость, fps
+	float m_fCurrentRate; // текущая скорость, fps
+	DWORD m_dwFrameTotal;
+	DWORD m_dwFrameCurrent;
+	u32 m_dwFirstFrameOffset;
+
+protected:
+	DWORD CalcFrame();
+	BOOL DecompressFrame(DWORD dwFrameNum);
+	VOID PreRoll(DWORD dwFrameNum);
+};
+
+enum class Result 
+{
+    Ok = 0,
+    ServiceUnavailable = 1,
+    InvalidVersion = 2,
+    LockFailed = 3,
+    InternalError = 4,
+    InvalidPayload = 5,
+    InvalidCommand = 6,
+    InvalidPermissions = 7,
+    NotFetched = 8,
+    NotFound = 9,
+    Conflict = 10,
+    InvalidSecret = 11,
+    InvalidJoinSecret = 12,
+    NoEligibleActivity = 13,
+    InvalidInvite = 14,
+    NotAuthenticated = 15,
+    InvalidAccessToken = 16,
+    ApplicationMismatch = 17,
+    InvalidDataUrl = 18,
+    InvalidBase64 = 19,
+    NotFiltered = 20,
+    LobbyFull = 21,
+    InvalidLobbySecret = 22,
+    InvalidFilename = 23,
+    InvalidFileSize = 24,
+    InvalidEntitlement = 25,
+    NotInstalled = 26,
+    NotRunning = 27,
+    InsufficientBuffer = 28,
+    PurchaseCanceled = 29,
+    InvalidGuild = 30,
+    InvalidEvent = 31,
+    InvalidChannel = 32,
+    InvalidOrigin = 33,
+    RateLimited = 34,
+    OAuth2Error = 35,
+    SelectChannelTimeout = 36,
+    GetGuildTimeout = 37,
+    SelectVoiceForceRequired = 38,
+    CaptureShortcutAlreadyListening = 39,
+    UnauthorizedForAchievement = 40,
+    InvalidGiftCode = 41,
+    PurchaseError = 42,
+    TransactionAborted = 43,
+    DrawingInitFailed = 44,
+};
+
+enum class CreateFlags 
+{
+    Default = 0,
+    NoRequireDiscord = 1,
+};
+
+enum class LogLevel 
+{
+    Error = 1,
+    Warn,
+    Info,
+    Debug,
+};
+
+enum class UserFlag 
+{
+    Partner = 2,
+    HypeSquadEvents = 4,
+    HypeSquadHouse1 = 64,
+    HypeSquadHouse2 = 128,
+    HypeSquadHouse3 = 256,
+};
+
+enum class PremiumType 
+{
+    None = 0,
+    Tier1 = 1,
+    Tier2 = 2,
+};
+
+enum class ImageType 
+{
+    User,
+};
+
+enum class ActivityType 
+{
+    Playing,
+    Streaming,
+    Listening,
+    Watching,
+};
+
+enum class ActivityActionType 
+{
+    Join = 1,
+    Spectate,
+};
+
+enum class ActivityJoinRequestReply 
+{
+    No,
+    Yes,
+    Ignore,
+};
+
+enum class Status 
+{
+    Offline = 0,
+    Online = 1,
+    Idle = 2,
+    DoNotDisturb = 3,
+};
+
+enum class RelationshipType 
+{
+    None,
+    Friend,
+    Blocked,
+    PendingIncoming,
+    PendingOutgoing,
+    Implicit,
+};
+
+enum class LobbyType 
+{
+    Private = 1,
+    Public,
+};
+
+enum class LobbySearchComparison 
+{
+    LessThanOrEqual = -2,
+    LessThan,
+    Equal,
+    GreaterThan,
+    GreaterThanOrEqual,
+    NotEqual,
+};
+
+enum class LobbySearchCast 
+{
+    String = 1,
+    Number,
+};
+
+enum class LobbySearchDistance 
+{
+    Local,
+    Default,
+    Extended,
+    Global,
+};
+
+enum class KeyVariant 
+{
+    Normal,
+    Right,
+    Left,
+};
+
+enum class MouseButton 
+{
+    Left,
+    Middle,
+    Right,
+};
+
+enum class EntitlementType 
+{
+    Purchase = 1,
+    PremiumSubscription,
+    DeveloperGift,
+    TestModePurchase,
+    FreePurchase,
+    UserGift,
+    PremiumPurchase,
+};
+
+enum class SkuType 
+{
+    Application = 1,
+    DLC,
+    Consumable,
+    Bundle,
+};
+
+enum class InputModeType 
+{
+    VoiceActivity = 0,
+    PushToTalk,
+};
+
+using ClientId = std::int64_t;
+using Version = std::int32_t;
+using Snowflake = std::int64_t;
+using Timestamp = std::int64_t;
+using UserId = Snowflake;
+using Locale = char const*;
+using Branch = char const*;
+using LobbyId = Snowflake;
+using LobbySecret = char const*;
+using MetadataKey = char const*;
+using MetadataValue = char const*;
+using NetworkPeerId = std::uint64_t;
+using NetworkChannelId = std::uint8_t;
+using Path = char const*;
+using DateTime = char const*;
+
+class User final 
+{
+public:
+    void SetId(UserId id);
+    UserId GetId() const;
+    void SetUsername(char const* username);
+    char const* GetUsername() const;
+    void SetDiscriminator(char const* discriminator);
+    char const* GetDiscriminator() const;
+    void SetAvatar(char const* avatar);
+    char const* GetAvatar() const;
+    void SetBot(bool bot);
+    bool GetBot() const;
+
+private:
+    DiscordUser internal_;
+};
+
+class OAuth2Token final 
+{
+public:
+    void SetAccessToken(char const* accessToken);
+    char const* GetAccessToken() const;
+    void SetScopes(char const* scopes);
+    char const* GetScopes() const;
+    void SetExpires(Timestamp expires);
+    Timestamp GetExpires() const;
+
+private:
+    DiscordOAuth2Token internal_;
+};
+
+class ImageHandle final 
+{
+public:
+    void SetType(ImageType type);
+    ImageType GetType() const;
+    void SetId(std::int64_t id);
+    std::int64_t GetId() const;
+    void SetSize(std::uint32_t size);
+    std::uint32_t GetSize() const;
+
+private:
+    DiscordImageHandle internal_;
+};
+
+class ImageDimensions final 
+{
+public:
+    void SetWidth(std::uint32_t width);
+    std::uint32_t GetWidth() const;
+    void SetHeight(std::uint32_t height);
+    std::uint32_t GetHeight() const;
+
+private:
+    DiscordImageDimensions internal_;
+};
+
+class ActivityTimestamps final 
+{
+public:
+    void SetStart(Timestamp start);
+    Timestamp GetStart() const;
+    void SetEnd(Timestamp end);
+    Timestamp GetEnd() const;
+
+private:
+    DiscordActivityTimestamps internal_;
+};
+
+class ActivityAssets final 
+{
+public:
+    void SetLargeImage(char const* largeImage);
+    char const* GetLargeImage() const;
+    void SetLargeText(char const* largeText);
+    char const* GetLargeText() const;
+    void SetSmallImage(char const* smallImage);
+    char const* GetSmallImage() const;
+    void SetSmallText(char const* smallText);
+    char const* GetSmallText() const;
+
+private:
+    DiscordActivityAssets internal_;
+};
+
+class PartySize final 
+{
+public:
+    void SetCurrentSize(std::int32_t currentSize);
+    std::int32_t GetCurrentSize() const;
+    void SetMaxSize(std::int32_t maxSize);
+    std::int32_t GetMaxSize() const;
+
+private:
+    DiscordPartySize internal_;
+};
+
+class ActivityParty final 
+{
+public:
+    void SetId(char const* id);
+    char const* GetId() const;
+    PartySize& GetSize();
+    PartySize const& GetSize() const;
+
+private:
+    DiscordActivityParty internal_;
+};
+
+class ActivitySecrets final 
+{
+public:
+    void SetMatch(char const* match);
+    char const* GetMatch() const;
+    void SetJoin(char const* join);
+    char const* GetJoin() const;
+    void SetSpectate(char const* spectate);
+    char const* GetSpectate() const;
+
+private:
+    DiscordActivitySecrets internal_;
+};
+
+class Activity final 
+{
+public:
+    void SetType(ActivityType type);
+    ActivityType GetType() const;
+    void SetApplicationId(std::int64_t applicationId);
+    std::int64_t GetApplicationId() const;
+    void SetName(char const* name);
+    char const* GetName() const;
+    void SetState(char const* state);
+    char const* GetState() const;
+    void SetDetails(char const* details);
+    char const* GetDetails() const;
+    ActivityTimestamps& GetTimestamps();
+    ActivityTimestamps const& GetTimestamps() const;
+    ActivityAssets& GetAssets();
+    ActivityAssets const& GetAssets() const;
+    ActivityParty& GetParty();
+    ActivityParty const& GetParty() const;
+    ActivitySecrets& GetSecrets();
+    ActivitySecrets const& GetSecrets() const;
+    void SetInstance(bool instance);
+    bool GetInstance() const;
+
+private:
+    DiscordActivity internal_;
+};
+
+class Presence final 
+{
+public:
+    void SetStatus(Status status);
+    Status GetStatus() const;
+    Activity& GetActivity();
+    Activity const& GetActivity() const;
+
+private:
+    DiscordPresence internal_;
+};
+
+class Relationship final 
+{
+public:
+    void SetType(RelationshipType type);
+    RelationshipType GetType() const;
+    User& GetUser();
+    User const& GetUser() const;
+    Presence& GetPresence();
+    Presence const& GetPresence() const;
+
+private:
+    DiscordRelationship internal_;
+};
+
+class Lobby final 
+{
+public:
+    void SetId(LobbyId id);
+    LobbyId GetId() const;
+    void SetType(LobbyType type);
+    LobbyType GetType() const;
+    void SetOwnerId(UserId ownerId);
+    UserId GetOwnerId() const;
+    void SetSecret(LobbySecret secret);
+    LobbySecret GetSecret() const;
+    void SetCapacity(std::uint32_t capacity);
+    std::uint32_t GetCapacity() const;
+    void SetLocked(bool locked);
+    bool GetLocked() const;
+
+private:
+    DiscordLobby internal_;
+};
+
+class ImeUnderline final 
+{
+public:
+    void SetFrom(std::int32_t from);
+    std::int32_t GetFrom() const;
+    void SetTo(std::int32_t to);
+    std::int32_t GetTo() const;
+    void SetColor(std::uint32_t color);
+    std::uint32_t GetColor() const;
+    void SetBackgroundColor(std::uint32_t backgroundColor);
+    std::uint32_t GetBackgroundColor() const;
+    void SetThick(bool thick);
+    bool GetThick() const;
+
+private:
+    DiscordImeUnderline internal_;
+};
+
+class Rect final 
+{
+public:
+    void SetLeft(std::int32_t left);
+    std::int32_t GetLeft() const;
+    void SetTop(std::int32_t top);
+    std::int32_t GetTop() const;
+    void SetRight(std::int32_t right);
+    std::int32_t GetRight() const;
+    void SetBottom(std::int32_t bottom);
+    std::int32_t GetBottom() const;
+
+private:
+    DiscordRect internal_;
+};
+
+class FileStat final 
+{
+public:
+    void SetFilename(char const* filename);
+    char const* GetFilename() const;
+    void SetSize(std::uint64_t size);
+    std::uint64_t GetSize() const;
+    void SetLastModified(std::uint64_t lastModified);
+    std::uint64_t GetLastModified() const;
+
+private:
+    DiscordFileStat internal_;
+};
+
+class Entitlement final 
+{
+public:
+    void SetId(Snowflake id);
+    Snowflake GetId() const;
+    void SetType(EntitlementType type);
+    EntitlementType GetType() const;
+    void SetSkuId(Snowflake skuId);
+    Snowflake GetSkuId() const;
+
+private:
+    DiscordEntitlement internal_;
+};
+
+class SkuPrice final 
+{
+public:
+    void SetAmount(std::uint32_t amount);
+    std::uint32_t GetAmount() const;
+    void SetCurrency(char const* currency);
+    char const* GetCurrency() const;
+
+private:
+    DiscordSkuPrice internal_;
+};
+
+class Sku final 
+{
+public:
+    void SetId(Snowflake id);
+    Snowflake GetId() const;
+    void SetType(SkuType type);
+    SkuType GetType() const;
+    void SetName(char const* name);
+    char const* GetName() const;
+    SkuPrice& GetPrice();
+    SkuPrice const& GetPrice() const;
+
+private:
+    DiscordSku internal_;
+};
+
+class InputMode final 
+{
+public:
+    void SetType(InputModeType type);
+    InputModeType GetType() const;
+    void SetShortcut(char const* shortcut);
+    char const* GetShortcut() const;
+
+private:
+    DiscordInputMode internal_;
+};
+
+class UserAchievement final 
+{
+public:
+    void SetUserId(Snowflake userId);
+    Snowflake GetUserId() const;
+    void SetAchievementId(Snowflake achievementId);
+    Snowflake GetAchievementId() const;
+    void SetPercentComplete(std::uint8_t percentComplete);
+    std::uint8_t GetPercentComplete() const;
+    void SetUnlockedAt(DateTime unlockedAt);
+    DateTime GetUnlockedAt() const;
+
+private:
+    DiscordUserAchievement internal_;
+};
+
+class LobbyTransaction final 
+{
+public:
+    Result SetType(LobbyType type);
+    Result SetOwner(UserId ownerId);
+    Result SetCapacity(std::uint32_t capacity);
+    Result SetMetadata(MetadataKey key, MetadataValue value);
+    Result DeleteMetadata(MetadataKey key);
+    Result SetLocked(bool locked);
+
+    IDiscordLobbyTransaction** Receive();
+    IDiscordLobbyTransaction* Internal();
+
+private:
+    IDiscordLobbyTransaction* internal_;
+};
+
+class LobbyMemberTransaction final 
+{
+public:
+    Result SetMetadata(MetadataKey key, MetadataValue value);
+    Result DeleteMetadata(MetadataKey key);
+    IDiscordLobbyMemberTransaction** Receive();
+    IDiscordLobbyMemberTransaction* Internal();
+
+private:
+    IDiscordLobbyMemberTransaction* internal_;
+};
+
+class LobbySearchQuery final 
+{
+public:
+    Result Filter(MetadataKey key, LobbySearchComparison comparison, LobbySearchCast cast, MetadataValue value);
+    Result Sort(MetadataKey key, LobbySearchCast cast, MetadataValue value);
+    Result Limit(std::uint32_t limit);
+    Result Distance(LobbySearchDistance distance);
+    IDiscordLobbySearchQuery** Receive();
+    IDiscordLobbySearchQuery* Internal();
+
+private:
+    IDiscordLobbySearchQuery* internal_;
+};
+
+class UserEvents final 
+{
+public:
+  static void OnCurrentUserUpdate(void* callbackData);
+};
+
+class UserManager final 
+{
+public:
+    ~UserManager() = default;
+
+    Result GetCurrentUser(User* currentUser);
+    void GetUser(UserId userId, std::function<void(Result, User const&)> callback);
+    Result GetCurrentUserPremiumType(PremiumType* premiumType);
+    Result CurrentUserHasFlag(UserFlag flag, bool* hasFlag);
+
+    Event<> OnCurrentUserUpdate;
+
+private:
+    friend class Core;
+
+    UserManager() = default;
+    UserManager(UserManager const& rhs) = delete;
+    UserManager& operator=(UserManager const& rhs) = delete;
+    UserManager(UserManager&& rhs) = delete;
+    UserManager& operator=(UserManager&& rhs) = delete;
+
+    IDiscordUserManager* internal_;
+    static IDiscordUserEvents events_;
+};
+
+struct vis_data
+{
+	Fsphere sphere; //
+	Fbox box; //
+	u32 marker; // for different sub-renders
+	u32 accept_frame; // when it was requisted accepted for main render
+	u32 hom_frame; // when to perform test - shedule
+	u32 hom_tested; // when it was last time tested
+
+	void clear();
+};
+
+class VoiceEvents final 
+{
+public:
+  static void OnSettingsUpdate(void* callbackData);
+};
+
+class VoiceManager final 
+{
+public:
+    ~VoiceManager() = default;
+
+    Result GetInputMode(InputMode* inputMode);
+    void SetInputMode(InputMode inputMode, std::function<void(Result)> callback);
+    Result IsSelfMute(bool* mute);
+    Result SetSelfMute(bool mute);
+    Result IsSelfDeaf(bool* deaf);
+    Result SetSelfDeaf(bool deaf);
+    Result IsLocalMute(Snowflake userId, bool* mute);
+    Result SetLocalMute(Snowflake userId, bool mute);
+    Result GetLocalVolume(Snowflake userId, std::uint8_t* volume);
+    Result SetLocalVolume(Snowflake userId, std::uint8_t volume);
+
+    Event<> OnSettingsUpdate;
+
+private:
+    friend class Core;
+
+    VoiceManager() = default;
+    VoiceManager(VoiceManager const& rhs) = delete;
+    VoiceManager& operator=(VoiceManager const& rhs) = delete;
+    VoiceManager(VoiceManager&& rhs) = delete;
+    VoiceManager& operator=(VoiceManager&& rhs) = delete;
+
+    IDiscordVoiceManager* internal_;
+    static IDiscordVoiceEvents events_;
+};
+
+enum EFunction
+{
+  fCONSTANT = 0,
+  fSIN,
+  fTRIANGLE,
+  fSQUARE,
+  fSAWTOOTH,
+  fINVSAWTOOTH,
+  fFORCE32 = u32(-1)
+};
+
+struct WaveForm
+{
+public:
+	EFunction F;
+	float arg[4];	
+
+	WaveForm();
+  float Calculate(float t);
+	BOOL Similar(const WaveForm& W) const;
+  float signf(float t);
+	float Func(float t);
+};
+
+
+
+
+#define THUNDERBOLT_CACHE_SIZE 8
 #define HUD_CROSSHAIR (1<<0)
 #define HUD_CROSSHAIR_DIST (1<<1)
 #define HUD_WEAPON (1<<2)
@@ -3411,8 +5673,46 @@ private:
 #define CHUNK_ITEM_LIST 0x0001
 #define CHUNK_ITEM_COMMON 0x0001
 #define CHUNK_ITEM_KEYS 0x0002
-
-
+#define BITS1_MASK 0x80 // 10000000b
+#define BITS2_MASK 0xC0 // 11000000b
+#define BITS3_MASK 0xE0 // 11100000b
+#define BITS4_MASK 0xF0 // 11110000b
+#define BITS1_EXP 0x00 // 00000000b
+#define BITS2_EXP 0x80 // 10000000b
+#define BITS3_EXP 0xC0 // 11000000b
+#define BITS4_EXP 0xE0 // 11100000b
+#define MAX_MB_CHARS 4096
+#define EOBJ_OMOTION 0x1100
+#define EOBJ_SMOTION 0x1200
+#define EOBJ_OMOTION_VERSION 0x0005
+#define EOBJ_SMOTION_VERSION 0x0007
+#define MP_DEBUG_AUTH 0x7ebf746e
+#define SAMPLE_SIZE 256
+#define P_MAXINT 0x7fffffff
+#define REG_PRIORITY_LOW 0x11111111ul
+#define REG_PRIORITY_NORMAL 0x22222222ul
+#define REG_PRIORITY_HIGH 0x33333333ul
+#define REG_PRIORITY_CAPTURE 0x7ffffffful
+#define REG_PRIORITY_INVALID 0xfffffffful
+#define IDDEBUG 3
+#define IDD_STARTUP 106
+#define IDI_ICON1 111
+#define IDB_BITMAP2 116
+#define IDB_BITMAP3 120
+#define IDB_BITMAP1 123
+#define IDC_LIST 1000
+#define IDC_FILE 1001
+#define IDC_LINE 1002
+#define IDC_DESC 1003
+#define IDSTOP 1004
+#define IDC_STACK 1006
+#define IDC_STATIC_LOGO 1007
+#define RC_VIRT_MEM_ERROR 2071
+#define RC_VIRT_MEM_TEXT 2072
+#define CLSID_HUDMANAGER MK_CLSID('H','U','D','_','M','N','G','R')
+#define CLSID_GAME_LEVEL MK_CLSID('G','_','L','E','V','E','L',' ')
+#define CLSID_GAME_PERSISTANT MK_CLSID('G','_','P','E','R','S','I','S')
+#define CLSID_OBJECT MK_CLSID('O','B','J','E','C','T',' ',' ')
 
 
 float psCamInert = 0.f;
@@ -3435,3 +5735,27 @@ const u16 xrOGF_SMParamsVersion = 4;
 const u8 xrOGF_FormatVersion = 4;
 int psNET_DedicatedSleep = 5;
 float g_console_sensitive = 0.15f;
+static const int max_desired_items = 2500;
+static const float source_radius = 12.5f;
+static const float source_offset = 20.f; // 40
+static const float max_distance = source_offset * 1.5f;//1.25f;
+static const float sink_offset = -(max_distance - source_offset);
+static const float drop_length = 5.f;
+static const float drop_width = 0.30f;
+static const float drop_angle = deg2rad(15.0f); // 3.0
+static const float drop_max_angle = deg2rad(35.f); // 10
+static const float drop_max_wind_vel = 20.0f;
+static const float drop_speed_min = 40.f;
+static const float drop_speed_max = 80.f;
+const int max_particles = 1000;
+const int particles_cache = 400;
+const float particles_time = .3f;
+const u32 MAX_PARTS = 4;
+const f32 SAMPLE_FPS = 30.f;
+const f32 SAMPLE_SPF = (1.f / SAMPLE_FPS);
+f32 const END_EPS = SAMPLE_SPF + EPS;
+const f32 KEY_Quant = 32767.f;
+const f32 KEY_QuantI = 1.f / KEY_Quant;
+const float fQuantizerRangeExt = 1.5f;
+int g_ErrorLineCount = 15;
+int g_svTextConsoleUpdateRate = 1;
