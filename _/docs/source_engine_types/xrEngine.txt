@@ -2545,6 +2545,779 @@ private:
 	friend class dxFontRender;
 };
 
+enum
+{
+	flBreakable = (1ul << 0ul),
+	flBounceable = (1ul << 2ul),
+	flSkidmark = (1ul << 3ul),
+	flBloodmark = (1ul << 4ul),
+	flClimable = (1ul << 5ul),
+	flPassable = (1ul << 7ul),
+	flDynamic = (1ul << 8ul),
+	flLiquid = (1ul << 9ul),
+	flSuppressShadows = (1ul << 10ul),
+	flSuppressWallmarks = (1ul << 11ul),
+	flActorObstacle = (1ul << 12ul),
+	flNoRicoshet = (1ul << 13ul),
+	flInjurious = (1ul << 28ul),
+	flShootable = (1ul << 29ul),
+	flTransparent = (1ul << 30ul),
+	flSlowDown = (1ul << 31ul)
+};
+
+struct SGameMtl
+{
+public:
+	shared_str m_Name;
+	shared_str m_Desc;
+	Flags32 Flags;
+	float fPHFriction; // ?
+	float fPHDamping; // ?
+	float fPHSpring; // ?
+	float fPHBounceStartVelocity; // ?
+	float fPHBouncing; // ?
+	float fFlotationFactor; // 0.f - 1.f (1.f-полностью проходимый)
+	float fShootFactor; // 0.f - 1.f (1.f-полностью простреливаемый)
+	float fShootFactorMP; // 0.f - 1.f (1.f-полностью простреливаемый)
+	float fBounceDamageFactor; // 0.f - 100.f
+	float fInjuriousSpeed; // 0.f - ... (0.f-не отбирает здоровье (скорость уменьшения здоровья))
+	float fVisTransparencyFactor; // 0.f - 1.f (1.f-полностью прозрачный)
+	float fSndOcclusionFactor; // 0.f - 1.f (1.f-полностью слышен)
+	float fDensityFactor;
+  
+public:
+	SGameMtl();
+	void Load(IReader& fs);
+	void Save(IWriter& fs);
+	int GetID();
+  
+private:
+	friend class CGameMtlLibrary;
+  
+protected:
+	int ID; // auto number
+};
+
+enum
+{
+  flBreakingSounds = (1 << 1),
+  flStepSounds = (1 << 2),
+  flCollideSounds = (1 << 4),
+  flCollideParticles = (1 << 5),
+  flCollideMarks = (1 << 6)
+};
+
+struct SGameMtlPair
+{  
+public:
+	xr_string BreakingSoundsStr;
+	xr_string StepSoundsStr;
+	xr_string CollideSoundsStr;
+	xr_string CollideParticlesStr;
+	xr_string CollideMarksStr;
+	Flags32 OwnProps;
+	SoundVec BreakingSounds;
+	SoundVec StepSounds;
+	SoundVec CollideSounds;
+	PSVec CollideParticles;
+	FactoryPtr<IWallMarkArray> m_pCollideMarks;
+
+public:
+	SGameMtlPair(CGameMtlLibrary* owner);  
+	~SGameMtlPair();
+  void CreateSoundsImpl(SoundVec& sounds, LPCSTR str);
+	void CreateParticlesImpl(PSVec& particles, LPCSTR str);
+	void CreateMarksImpl(IWallMarkArray* marks, LPCSTR str);
+	int GetMtl0();
+	int GetMtl1();
+	int GetID();
+	void SetPair(int m0, int m1);
+	bool IsPair(int m0, int m1);
+	void Save(IWriter& fs);
+	void Load(IReader& fs);
+	int GetParent();
+	BOOL SetParent(int parent);
+  LPCSTR dbg_Name();
+  
+private:
+  friend class CGameMtlLibrary;
+	CGameMtlLibrary* m_Owner;
+	int mtl0;
+	int mtl1;
+  
+protected:
+	int ID; // auto number
+	int ID_parent;
+};
+
+DEFINE_VECTOR(SGameMtlPair*, GameMtlPairVec, GameMtlPairIt);
+
+class CGameMtlLibrary
+{
+public:
+	CGameMtlLibrary();
+	~CGameMtlLibrary();
+	IC void Unload();
+	GameMtlIt GetMaterialIt(LPCSTR name);
+	GameMtlIt GetMaterialIt(shared_str& name);
+	GameMtlIt GetMaterialItByID(int id);
+	u32 GetMaterialID(LPCSTR name);
+	SGameMtl* GetMaterialByID(s32 id);
+	u16 GetMaterialIdx(int ID);
+	u16 GetMaterialIdx(LPCSTR name);
+	SGameMtl* GetMaterialByIdx(u16 idx);
+	GameMtlIt FirstMaterial();
+	GameMtlIt LastMaterial();
+	u32 CountMaterial();
+	SGameMtlPair* GetMaterialPair(u16 idx0, u16 idx1);
+	GameMtlPairIt FirstMaterialPair();
+	GameMtlPairIt LastMaterialPair();
+	void Load();
+	bool Save();
+  
+private:
+	int material_index;
+	int material_pair_index;
+	GameMtlVec materials;
+	GameMtlPairVec material_pairs;
+};
+
+class ICollidable
+{
+public:
+	ICollisionForm* model;
+
+	ICollidable();
+	virtual ~ICollidable();
+};
+
+struct SItem_ServerInfo
+{
+  string128 name;
+  u32 color;
+};
+
+class CServerInfo
+{
+public:
+	u32 Size();
+	void ResetData();
+	void AddItem(LPCSTR name_, LPCSTR value_, u32 color_ = RGB(255, 255, 255));
+	void AddItem(shared_str& name_, LPCSTR value_, u32 color_ = RGB(255, 255, 255));
+	SItem_ServerInfo& operator[](u32 id);
+	CServerInfo();
+	~CServerInfo();
+  
+private:
+	const u32 max_item = 15;
+	svector<SItem_ServerInfo, max_item> data;
+};
+
+struct _esound_delegate
+{
+  Feel::Sound* dest;
+  ref_sound_data_ptr source;
+  float power;
+};
+
+class IGame_Level :	public DLL_Pure, public IInputReceiver, public pureRender, public pureFrame, public IEventReceiver
+{  
+public:
+	CObjectList Objects;
+	CObjectSpace ObjectSpace;
+	CCameraManager& Cameras();
+	BOOL bReady;
+	CInifile* pLevel;
+	xr_vector<_esound_delegate> snd_Events;
+  
+public:
+	IGame_Level();
+	virtual ~IGame_Level();
+	virtual shared_str name() const = 0;
+	virtual void GetLevelInfo(CServerInfo* si) = 0;
+	virtual bool net_Start(const char* op_server, const char* op_client) = 0;
+	virtual void net_Load(const char* name) = 0;
+	virtual void net_Save(const char* name) = 0;
+	virtual void net_Stop();
+	virtual void net_Update() = 0;
+	virtual bool Load(u32 dwNum);
+	virtual bool Load_GameSpecific_Before();
+	virtual bool Load_GameSpecific_After();
+	virtual void Load_GameSpecific_CFORM(CDB::TRI* T, u32 count) = 0;
+	virtual void _BCL OnFrame(void);
+	virtual void OnRender(void);
+	virtual shared_str OpenDemoFile(const char* demo_file_name) = 0;
+	virtual void net_StartPlayDemo() = 0;
+	CObject* CurrentEntity(void) const;
+	CObject* CurrentViewEntity(void) const;
+	void SetEntity(CObject* O);
+	void SetViewEntity(CObject* O);
+	void SoundEvent_Register(ref_sound_data_ptr S, float range);
+	void SoundEvent_Dispatch();
+	void SoundEvent_OnDestDestroy(Feel::Sound*);
+	void LL_CheckTextures();
+	virtual void SetEnvironmentGameTimeFactor(u64 const& GameTime, float const& fTimeFactor) = 0;
+  
+protected:
+	CObject* pCurrentEntity;
+	CObject* pCurrentViewEntity;
+	xr_vector<ref_sound> Sounds_Random;
+	u32 Sounds_Random_dwNextTime;
+	BOOL Sounds_Random_Enabled;
+	CCameraManager* m_pCameras;
+	xr_vector<ISpatial*> snd_ER;
+};
+
+class IGame_ObjectPool
+{  
+public:
+	void prefetch();
+	void clear();
+	CObject* create(LPCSTR name);
+	void destroy(CObject* O);
+	IGame_ObjectPool();
+	virtual ~IGame_ObjectPool();
+  
+private:
+	typedef xr_vector<CObject*> ObjectVec;
+	typedef ObjectVec::iterator ObjectVecIt;
+	ObjectVec m_PrefetchObjects;
+};
+
+struct grass_data
+{
+  u8 index;
+  s8 anim[16];
+  u16 id[16];
+  Fvector pos[16];
+  Fvector3 dir[16];
+  float radius[16];
+  float radius_curr[16];
+  float str[16];
+  float str_target[16];
+  float time[16];
+  float fade[16];
+  float speed[16];
+}
+
+enum GrassBenders_Anim
+{
+  BENDER_ANIM_EXPLOSION = 0,
+  BENDER_ANIM_DEFAULT = 1,
+  BENDER_ANIM_WAVY = 2,
+  BENDER_ANIM_SUCK = 3,
+  BENDER_ANIM_BLOW = 4,
+  BENDER_ANIM_PULSE = 5,
+}; 
+
+struct act_dat
+{
+  float health;
+  float stamina;
+  float bleeding;
+  BOOL helmet;
+}
+
+struct pda_data
+{
+  float pda_display_factor;
+  float pda_psy_influence;
+  float pda_displaybrightness;
+}
+
+struct nv_data
+{
+  float lum_factor;
+}
+
+class IGame_Persistent : public DLL_Pure, public pureAppStart, public pureAppEnd, public pureAppActivate, public pureAppDeactivate, public pureFrame
+{
+public:
+	union params
+	{
+		struct
+		{
+			string256 m_game_or_spawn;
+			string256 m_game_type;
+			string256 m_alife;
+			string256 m_new_or_load;
+			EGameIDs m_e_game_type;
+		};
+
+		string256 m_params[4];
+		params();
+		void reset();
+		void parse_cmd_line(LPCSTR cmd_line);
+	};
+	params m_game_params;
+	xr_set<CPS_Instance*> ps_active;
+	xr_vector<CPS_Instance*> ps_destroy;
+	xr_vector<CPS_Instance*> ps_needtoplay;
+  CPerlinNoise1D* PerlinNoise1D;
+  grass_data grass_shader_data;
+  IMainMenu* m_pMainMenu;
+	ScriptWallmarksManager* m_pWallmarksManager;
+  ShadersExternalData* m_pGShaderConstants;
+  IGame_ObjectPool ObjectPool;
+	CEnvironment* pEnvironment;
+  act_dat actor_data;
+  pda_data pda_shader_data;
+  nv_data nv_shader_data;
+  
+public:
+	void GrassBendersUpdateAnimations();
+	void GrassBendersAddExplosion(u16 id, Fvector position, Fvector3 dir, float fade, float speed, float intensity, float radius);
+	void GrassBendersAddShot(u16 id, Fvector position, Fvector3 dir, float fade, float speed, float intensity, float radius);
+	void GrassBendersRemoveById(u16 id);
+	void GrassBendersRemoveByIndex(u8& idx);
+	void GrassBendersUpdate(u16 id, u8& data_idx, u32& data_frame, Fvector& position, float radius, float str, bool CheckDistance );
+	void GrassBendersReset(u8 idx);
+	void GrassBendersSet(u8 idx, u16 id, Fvector position, Fvector3 dir, float fade, float speed, float str, float radius, GrassBenders_Anim anim, bool resetTime);
+	float GrassBenderToValue(float& current, float go_to, float intensity, bool use_easing);
+  void destroy_particles(const bool& all_particles);
+	virtual void PreStart(LPCSTR op);
+	virtual void Start(LPCSTR op);
+	virtual void Disconnect();	
+	CEnvironment& Environment();
+	void Prefetch();	
+	ScriptWallmarksManager& GetWallmarksManager() const;
+	virtual bool OnRenderPPUI_query();
+	virtual void OnRenderPPUI_main();
+	virtual void OnRenderPPUI_PP();
+	virtual void OnAppStart();
+	virtual void OnAppEnd();
+	virtual void OnAppActivate();
+	virtual void OnAppDeactivate();
+	virtual void _BCL OnFrame();
+	virtual void OnGameStart();
+	virtual void OnGameEnd();
+	virtual void UpdateGameType();
+	virtual void GetCurrentDof(Fvector3& dof);
+	virtual void SetBaseDof(const Fvector3& dof);
+	virtual void OnSectorChanged(int sector);
+	virtual void OnAssetsChanged();
+	virtual void RegisterModel(IRenderVisual* V)= 0;
+	virtual float MtlTransparent(u32 mtl_idx)	= 0;
+	IGame_Persistent();
+	virtual ~IGame_Persistent();
+	ICF u32 GameType();
+	virtual void Statistics(CGameFont* F)	= 0;
+	virtual void LoadTitle(bool change_tip = false, shared_str map_name = "");
+	virtual bool CanBePaused();
+
+private:
+	CInifile* m_textures_prefetch_config;  
+};
+
+class IMainMenu
+{
+public:
+	virtual ~IMainMenu();
+	virtual void Activate(bool bActive) = 0;
+	virtual bool IsActive() = 0;
+	virtual bool CanSkipSceneRendering() = 0;
+	virtual void DestroyInternal(bool bForce) = 0;
+};
+
+class IInputReceiver
+{
+public:
+	static void IR_GetLastMouseDelta(Ivector2& p);
+	static void IR_GetMousePosScreen(Ivector2& p);
+	static void IR_GetMousePosReal(HWND hwnd, Ivector2& p);
+	static void IR_GetMousePosReal(Ivector2& p);
+	static void IR_GetMousePosIndependent(Fvector2& f);
+	static void IR_GetMousePosIndependentCrop(Fvector2& f);
+	BOOL IR_GetKeyState(int dik);
+	BOOL IR_GetBtnState(int btn);
+	void IR_Capture(void);
+	void IR_Release(void);
+	virtual void IR_OnDeactivate(void);
+	virtual void IR_OnActivate(void);
+	virtual void IR_OnMousePress(int btn);
+	virtual void IR_OnMouseRelease(int btn);
+	virtual void IR_OnMouseHold(int btn);
+	virtual void IR_OnMouseWheel(int direction);
+	virtual void IR_OnMouseMove(int x, int y);
+	virtual void IR_OnMouseStop(int x, int y);
+	virtual void IR_OnKeyboardPress(int dik);
+	virtual void IR_OnKeyboardRelease(int dik);
+	virtual void IR_OnKeyboardHold(int dik);
+};
+
+class ImageManager final 
+{
+public:
+    ~ImageManager() = default;
+
+    void Fetch(ImageHandle handle, bool refresh, std::function<void(Result, ImageHandle)> callback);
+    Result GetDimensions(ImageHandle handle, ImageDimensions* dimensions);
+    Result GetData(ImageHandle handle, std::uint8_t* data, std::uint32_t dataLength);
+
+private:
+    friend class Core;
+
+    ImageManager() = default;
+    ImageManager(ImageManager const& rhs) = delete;
+    ImageManager& operator=(ImageManager const& rhs) = delete;
+    ImageManager(ImageManager&& rhs) = delete;
+    ImageManager& operator=(ImageManager&& rhs) = delete;
+
+    IDiscordImageManager* internal_;
+    static IDiscordImageEvents events_;
+};
+
+__interface IObjectPhysicsCollision
+{
+public:
+	virtual const IPhysicsShell* physics_shell() const = 0;
+	virtual const IPhysicsElement* physics_character() const = 0; //depricated
+};
+
+__interface IPhDebugRender
+{
+	virtual void open_cashed_draw() = 0;
+	virtual void close_cashed_draw(u32 remove_time) = 0;
+	virtual void draw_tri(const Fvector& v0, const Fvector& v1, const Fvector& v2, u32 c, bool solid) = 0;
+};
+
+class IPhysicsGeometry
+{
+public:
+	virtual void get_Box(Fmatrix& form, Fvector& sz) const = 0;
+	virtual bool collide_fluids() const = 0;
+};
+
+class IPhysicsElement
+{
+public:
+	virtual const Fmatrix& XFORM() const = 0;
+	virtual void get_LinearVel(Fvector& velocity) const = 0;
+	virtual void get_AngularVel(Fvector& velocity) const = 0;
+	virtual void get_Box(Fvector& sz, Fvector& c) const = 0;
+	virtual const Fvector& mass_Center() const = 0;
+	virtual u16 numberOfGeoms() const = 0;
+	virtual const IPhysicsGeometry* geometry(u16 i) const = 0;
+};
+
+class IPhysicsShell
+{
+public:
+	virtual const Fmatrix& XFORM() const = 0;
+	virtual const IPhysicsElement& Element(u16 index) const = 0;
+	virtual u16 get_ElementsNumber() const = 0;
+};
+
+class IRenderable
+{
+public:
+	Fmatrix xform;
+  IRenderVisual* visual;
+  IRender_ObjectSpecific* pROS;
+  BOOL pROS_Allowed;
+
+public:
+	IRenderable();
+	virtual ~IRenderable();
+	IRender_ObjectSpecific* renderable_ROS();
+	virtual void renderable_Render() = 0;
+	virtual BOOL renderable_ShadowGenerate();
+	virtual BOOL renderable_ShadowReceive();
+	virtual float GetHotness();
+	virtual float GetTransparency();
+	virtual float GetGlowing();
+};
+
+class ISheduled
+{
+public:
+	u32 t_min : 14; // minimal bound of update time (sample: 20ms)
+  u32 t_max : 14; // maximal bound of update time (sample: 200ms)
+  u32 b_RT : 1;
+  u32 b_locked : 1;
+  u32 dbg_startframe;
+  u32 dbg_update_shedule;
+
+	ISheduled();
+	virtual ~ISheduled();
+	void shedule_register();
+	void shedule_unregister();
+	virtual float shedule_Scale() = 0;
+	virtual void shedule_Update(u32 dt);
+	virtual shared_str shedule_Name() const;
+	virtual bool shedule_Needed() = 0;
+};
+
+class CLAItem
+{
+public:
+	shared_str cName;
+	float fFPS;
+	float def_fFPS;
+	DEFINE_MAP(int, u32, KeyMap, KeyPairIt);
+	KeyMap Keys;
+	int iFrameCount;
+  
+public:
+	CLAItem();
+	void InitDefault();
+	void Load(IReader& F);
+	void Save(IWriter& F);
+	float Length_sec();
+	u32 Length_ms();
+	u32 InterpolateRGB(int frame);
+	u32 InterpolateBGR(int frame);
+	u32 CalculateRGB(float T, int& frame);
+	u32 CalculateBGR(float T, int& frame);
+	void SetFramerate(float framerate);
+	void ResetFramerate();
+	void Resize(int new_len);
+	void InsertKey(int frame, u32 color);
+	void DeleteKey(int frame);
+	void MoveKey(int from, int to);
+	bool IsKey(int frame);
+	int PrevKeyFrame(int frame);
+	int NextKeyFrame(int frame);
+	int FirstKeyFrame();
+	int LastKeyFrame();
+	u32* GetKey(int frame);
+};
+
+DEFINE_VECTOR(CLAItem*, LAItemVec, LAItemIt);
+
+class ELightAnimLibrary
+{
+public:
+	LAItemVec Items;
+	LAItemIt FindItemI(LPCSTR name);
+	CLAItem* FindItem(LPCSTR name);
+	ELightAnimLibrary();
+	~ELightAnimLibrary();
+	void OnCreate();
+	void OnDestroy();
+	void Load();
+	void Save();
+	void Reload();
+	void Unload();
+	CLAItem* AppendItem(LPCSTR name, CLAItem* src);
+	LAItemVec& Objects();
+};
+
+enum key_state
+{
+	ks_free = u32(0),
+	ks_LShift = u32(1) << 0,
+	ks_RShift = u32(1) << 1,
+	ks_LCtrl = u32(1) << 2,
+	ks_RCtrl = u32(1) << 3,
+	ks_LAlt = u32(1) << 4,
+	ks_RAlt = u32(1) << 5,
+	ks_CapsLock = u32(1) << 6,
+	ks_Shift = u32(ks_LShift | ks_RShift),
+	ks_Ctrl = u32(ks_LCtrl | ks_RCtrl),
+	ks_Alt = u32(ks_LAlt | ks_RAlt),
+	ks_force = u32(-1)
+};
+
+enum init_mode
+{
+	im_standart = 0,
+	im_number_only,
+	im_read_only,
+	im_file_name_mode,
+	im_count
+};
+
+enum 
+{ 
+  MIN_BUF_SIZE = 8, 
+  MAX_BUF_SIZE = 4096 
+};
+
+class line_edit_control
+{
+public:
+	line_edit_control(u32 str_buffer_size);
+	void init(u32 str_buffer_size, init_mode mode = im_standart);
+	~line_edit_control();
+	void clear_states();
+	void on_key_press(int dik);
+	void on_key_hold(int dik);
+	void on_key_release(int dik);
+	void on_frame();
+	void assign_callback(u32 const dik, key_state state, Callback const& callback);
+	void insert_character(char c);
+	IC bool get_key_state(key_state mask) const;
+	IC void set_key_state(key_state mask, bool value);
+	IC bool cursor_view() const;
+	IC bool need_update() const;
+	IC LPCSTR str_edit() const;
+	IC LPCSTR str_before_cursor() const;
+	IC LPCSTR str_before_mark() const;
+	IC LPCSTR str_mark() const;
+	IC LPCSTR str_after_mark() const;
+	void set_edit(LPCSTR str);
+	void set_selected_mode(bool status);
+	bool get_selected_mode() const;
+
+private:
+	line_edit_control(line_edit_control const&);
+	line_edit_control const& operator=(line_edit_control const&);
+	void update_key_states();
+	void update_bufs();
+	void xr_stdcall undo_buf();
+	void xr_stdcall select_all_buf();
+	void xr_stdcall flip_insert_mode();
+	void xr_stdcall copy_to_clipboard();
+	void xr_stdcall paste_from_clipboard();
+	void xr_stdcall cut_to_clipboard();
+	void xr_stdcall move_pos_home();
+	void xr_stdcall move_pos_end();
+	void xr_stdcall move_pos_left();
+	void xr_stdcall move_pos_right();
+	void xr_stdcall move_pos_left_word();
+	void xr_stdcall move_pos_right_word();
+	void xr_stdcall delete_selected_back();
+	void xr_stdcall delete_selected_forward();
+	void xr_stdcall delete_word_back();
+	void xr_stdcall delete_word_forward();
+	void xr_stdcall SwitchKL();
+	void assign_char_pairs(init_mode mode);
+	void create_key_state(u32 const dik, key_state state);
+	void create_char_pair(u32 const dik, char c, char c_shift, bool translate = false);
+	void clear_inserted();
+	bool empty_inserted();
+	void add_inserted_text();
+	void delete_selected(bool back);
+	void compute_positions();
+	void clamp_cur_pos();
+
+private:
+  typedef text_editor::base Base;
+	typedef fastdelegate::FastDelegate0<void> Callback;
+
+	const u32 DIK_COUNT = 256;
+	Base* m_actions[DIK_COUNT];
+	char* m_edit_str;
+	char* m_undo_buf;
+	char* m_inserted;
+	char* m_buf0;
+	char* m_buf1;
+	char* m_buf2;
+	char* m_buf3;
+	int m_buffer_size;
+	int m_cur_pos;
+	int m_select_start;
+	int m_p1;
+	int m_p2;
+	float m_accel;
+	float m_cur_time;
+	float m_rep_time;
+	float m_last_key_time;
+	u32 m_last_frame_time;
+	u32 m_last_changed_frame;
+	Flags32 m_key_state;
+	bool m_hold_mode;
+	bool m_insert_mode;
+	bool m_repeat_mode;
+	bool m_mark;
+	bool m_cursor_view;
+	bool m_need_update;
+	bool m_unselected_mode;
+};
+
+class line_editor : public IInputReceiver
+{
+public:
+	line_editor(u32 str_buffer_size);
+	virtual ~line_editor();
+	line_edit_control& control();
+	void on_frame();
+
+protected:
+	virtual void IR_OnKeyboardPress(int dik);
+	virtual void IR_OnKeyboardHold(int dik);
+	virtual void IR_OnKeyboardRelease(int dik);
+
+private:
+	line_edit_control m_control;
+};
+
+class LobbyEvents final 
+{
+public:
+    static void OnLobbyUpdate(void* callbackData, int64_t lobbyId);
+    static void OnLobbyDelete(void* callbackData, int64_t lobbyId, uint32_t reason);
+    static void OnMemberConnect(void* callbackData, int64_t lobbyId, int64_t userId);
+    static void OnMemberUpdate(void* callbackData, int64_t lobbyId, int64_t userId);
+    static void OnMemberDisconnect(void* callbackData, int64_t lobbyId, int64_t userId);
+    static void OnLobbyMessage(void* callbackData, int64_t lobbyId, int64_t userId, uint8_t* data, uint32_t dataLength);
+    static void OnSpeaking(void* callbackData, int64_t lobbyId, int64_t userId, bool speaking);
+    static void OnNetworkMessage(void* callbackData, int64_t lobbyId, int64_t userId, uint8_t channelId, uint8_t* data, uint32_t dataLength);
+};
+
+class LobbyManager final 
+{
+public:
+    ~LobbyManager() = default;
+    Result GetLobbyCreateTransaction(LobbyTransaction* transaction);
+    Result GetLobbyUpdateTransaction(LobbyId lobbyId, LobbyTransaction* transaction);
+    Result GetMemberUpdateTransaction(LobbyId lobbyId, UserId userId, LobbyMemberTransaction* transaction);
+    void CreateLobby(LobbyTransaction const& transaction, std::function<void(Result, Lobby const&)> callback);
+    void UpdateLobby(LobbyId lobbyId, LobbyTransaction const& transaction, std::function<void(Result)> callback);
+    void DeleteLobby(LobbyId lobbyId, std::function<void(Result)> callback);
+    void ConnectLobby(LobbyId lobbyId, LobbySecret secret, std::function<void(Result, Lobby const&)> callback);
+    void ConnectLobbyWithActivitySecret(LobbySecret activitySecret, std::function<void(Result, Lobby const&)> callback);
+    void DisconnectLobby(LobbyId lobbyId, std::function<void(Result)> callback);
+    Result GetLobby(LobbyId lobbyId, Lobby* lobby);
+    Result GetLobbyActivitySecret(LobbyId lobbyId, char secret[128]);
+    Result GetLobbyMetadataValue(LobbyId lobbyId, MetadataKey key, char value[4096]);
+    Result GetLobbyMetadataKey(LobbyId lobbyId, std::int32_t index, char key[256]);
+    Result LobbyMetadataCount(LobbyId lobbyId, std::int32_t* count);
+    Result MemberCount(LobbyId lobbyId, std::int32_t* count);
+    Result GetMemberUserId(LobbyId lobbyId, std::int32_t index, UserId* userId);
+    Result GetMemberUser(LobbyId lobbyId, UserId userId, User* user);
+    Result GetMemberMetadataValue(LobbyId lobbyId, UserId userId, MetadataKey key, char value[4096]);
+    Result GetMemberMetadataKey(LobbyId lobbyId, UserId userId, std::int32_t index, char key[256]);
+    Result MemberMetadataCount(LobbyId lobbyId, UserId userId, std::int32_t* count);
+    void UpdateMember(LobbyId lobbyId, UserId userId, LobbyMemberTransaction const& transaction, std::function<void(Result)> callback);
+    void SendLobbyMessage(LobbyId lobbyId, std::uint8_t* data, std::uint32_t dataLength, std::function<void(Result)> callback);
+    Result GetSearchQuery(LobbySearchQuery* query);
+    void Search(LobbySearchQuery const& query, std::function<void(Result)> callback);
+    void LobbyCount(std::int32_t* count);
+    Result GetLobbyId(std::int32_t index, LobbyId* lobbyId);
+    void ConnectVoice(LobbyId lobbyId, std::function<void(Result)> callback);
+    void DisconnectVoice(LobbyId lobbyId, std::function<void(Result)> callback);
+    Result ConnectNetwork(LobbyId lobbyId);
+    Result DisconnectNetwork(LobbyId lobbyId);
+    Result FlushNetwork();
+    Result OpenNetworkChannel(LobbyId lobbyId, std::uint8_t channelId, bool reliable);
+    Result SendNetworkMessage(LobbyId lobbyId, UserId userId, std::uint8_t channelId, std::uint8_t* data, std::uint32_t dataLength);
+
+public:
+    Event<std::int64_t> OnLobbyUpdate;
+    Event<std::int64_t, std::uint32_t> OnLobbyDelete;
+    Event<std::int64_t, std::int64_t> OnMemberConnect;
+    Event<std::int64_t, std::int64_t> OnMemberUpdate;
+    Event<std::int64_t, std::int64_t> OnMemberDisconnect;
+    Event<std::int64_t, std::int64_t, std::uint8_t*, std::uint32_t> OnLobbyMessage;
+    Event<std::int64_t, std::int64_t, bool> OnSpeaking;
+    Event<std::int64_t, std::int64_t, std::uint8_t, std::uint8_t*, std::uint32_t> OnNetworkMessage;
+
+private:
+    friend class Core;
+
+    LobbyManager() = default;
+    LobbyManager(LobbyManager const& rhs) = delete;
+    LobbyManager& operator=(LobbyManager const& rhs) = delete;
+    LobbyManager(LobbyManager&& rhs) = delete;
+    LobbyManager& operator=(LobbyManager&& rhs) = delete;
+
+    IDiscordLobbyManager* internal_;
+    static IDiscordLobbyEvents events_;
+};
+
+
 #define HUD_CROSSHAIR (1<<0)
 #define HUD_CROSSHAIR_DIST (1<<1)
 #define HUD_WEAPON (1<<2)
@@ -2611,6 +3384,35 @@ private:
 #define DISCORD_STORE_MANAGER_VERSION 1
 #define DISCORD_VOICE_MANAGER_VERSION 1
 #define DISCORD_ACHIEVEMENT_MANAGER_VERSION 1
+#define GAMEMTL_CURRENT_VERSION 0x0001
+#define GAMEMTLS_CHUNK_VERSION 0x1000
+#define GAMEMTLS_CHUNK_AUTOINC 0x1001
+#define GAMEMTLS_CHUNK_MTLS 0x1002
+#define GAMEMTLS_CHUNK_MTLS_PAIR 0x1003
+#define GAMEMTL_CHUNK_MAIN 0x1000
+#define GAMEMTL_CHUNK_FLAGS 0x1001
+#define GAMEMTL_CHUNK_PHYSICS 0x1002
+#define GAMEMTL_CHUNK_FACTORS 0x1003
+#define GAMEMTL_CHUNK_FLOTATION 0x1004
+#define GAMEMTL_CHUNK_DESC 0x1005
+#define GAMEMTL_CHUNK_INJURIOUS 0x1006
+#define GAMEMTL_CHUNK_DENSITY 0x1007
+#define GAMEMTL_CHUNK_FACTORS_MP 0x1008
+#define GAMEMTLPAIR_CHUNK_PAIR 0x1000
+#define GAMEMTLPAIR_CHUNK_BREAKING 0x1002
+#define GAMEMTLPAIR_CHUNK_STEP 0x1003
+#define GAMEMTLPAIR_CHUNK_COLLIDE 0x1005
+#define GAMEMTL_SUBITEM_COUNT 10
+#define GAMEMTL_NONE_ID u32(-1)
+#define GAMEMTL_NONE_IDX u16(-1)
+#define GAMEMTL_FILENAME "gamemtl.xr"
+#define LANIM_VERSION 0x0001
+#define CHUNK_VERSION 0x0000
+#define CHUNK_ITEM_LIST 0x0001
+#define CHUNK_ITEM_COMMON 0x0001
+#define CHUNK_ITEM_KEYS 0x0002
+
+
 
 
 float psCamInert = 0.f;
@@ -2631,3 +3433,5 @@ const float fuzzy_guaranteed = 0.001f; // distance which is supposed 100% visibl
 const float lr_granularity = 0.1f; // assume similar positions
 const u16 xrOGF_SMParamsVersion = 4;
 const u8 xrOGF_FormatVersion = 4;
+int psNET_DedicatedSleep = 5;
+float g_console_sensitive = 0.15f;
