@@ -5576,8 +5576,1512 @@ public:
 	float Func(float t);
 };
 
+struct sLevelInfo
+{
+  char* folder;
+  char* name;
+};
+
+class CApplication : public pureFrame, public IEventReceiver
+{  
+public:
+  string2048 ls_header;
+	string2048 ls_tip_number;
+	string2048 ls_tip;
+	CGameFont* pFontSystem;
+	xr_vector<sLevelInfo> Levels;
+	u32 Level_Current;
+  
+public:
+	void Level_Scan();
+	int Level_ID(LPCSTR name, LPCSTR ver, bool bSet);
+	void Level_Set(u32 ID);
+	void LoadAllArchives();
+	CInifile* GetArchiveHeader(LPCSTR name, LPCSTR ver);
+	void LoadBegin();
+	void LoadEnd();
+	void LoadTitleInt(LPCSTR str1, LPCSTR str2, LPCSTR str3);
+	void LoadStage();
+	void LoadSwitch();
+	void LoadDraw();
+	virtual void OnEvent(EVENT E, u64 P1, u64 P2);
+	CApplication();
+	virtual ~CApplication();
+	virtual void _BCL OnFrame();
+	void load_draw_internal();
+	void destroy_loading_shaders();
+  
+private:
+  friend class dxApplicationRender;  
+	FactoryPtr<IApplicationRender> m_pRender;
+	int max_load_stage;
+	int load_stage;
+	u32 ll_dwReference;
+	EVENT eQuit;
+	EVENT eStart;
+	EVENT eStartLoad;
+	EVENT eDisconnect;
+	EVENT eConsole;
+	EVENT eStartMPDemo;
+
+private:
+	void Level_Append(LPCSTR lname);
+};
+
+struct rpc_info
+{
+	bool mainmenu;
+	bool loadscreen;
+	bool ingame;
+	bool ex_update;
+	bool ironman;
+	bool godmode;
+	int possessed_lives;
+	int health;
+	int lives_left;
+	int level_icon_index;
+	char task_name[128];
+	char faction_name[128];
+	char rank_name[128];
+	char reputation[128];
+	char level_name[128];
+	char gamemode[128];
+	LPCSTR currenttime;
+	LPCSTR faction;
+	LPCSTR level;
+};
+
+struct rpc_strings
+{
+	char loading[128];
+	char mainmenu[128];
+	char paused[128];
+	char health[128];
+	char livesleft[128];
+	char dead[128];
+	char livesleftsingle[128];
+	char livespossessed[128];
+	char livespossessedsingle[128];
+	char godmode[128];
+};
+
+struct clQueryTri
+{
+	Fvector p[3];
+	const CDB::TRI* T;
+};
+
+struct clQueryCollision
+{
+	xr_vector<CObject*> objects; // affected objects
+	xr_vector<clQueryTri> tris; // triangles (if queried)
+	xr_vector<Fobb> boxes; // boxes/ellipsoids (if queried)
+	xr_vector<Fvector4> spheres; // spheres (if queried)
+
+	IC void Clear();
+	IC void AddTri(const Fmatrix& m, const CDB::TRI* one, const Fvector* verts);
+	IC void AddTri(const CDB::TRI* one, const Fvector* verts);
+	IC void AddBox(const Fmatrix& M, const Fbox& B);
+	IC void AddBox(const Fobb& B);
+};
+
+enum ECollisionFormType
+{
+	cftObject,
+	cftShape
+};
+
+class ENGINE_API ICollisionForm
+{
+	friend class CObjectSpace;
+protected:
+	CObject* owner; // владелец
+	u32 dwQueryID;
+protected:
+	Fbox bv_box; // (Local) BBox объекта
+	Fsphere bv_sphere; // (Local) Sphere
+private:
+	ECollisionFormType m_type;
+public:
+	ICollisionForm(CObject* _owner, ECollisionFormType tp);
+	virtual ~ICollisionForm();
+
+	virtual BOOL _RayQuery(const collide::ray_defs& Q, collide::rq_results& R) = 0;
+	//virtual void _BoxQuery ( const Fbox& B, const Fmatrix& M, u32 flags) = 0;
+
+	IC CObject* Owner() const { return owner; }
+	const Fbox& getBBox() const { return bv_box; }
+	float getRadius() const { return bv_sphere.R; }
+	const Fsphere& getSphere() const { return bv_sphere; }
+	const ECollisionFormType Type() const { return m_type; }
+};
+
+struct SElement
+{  
+  Fmatrix b_IM; // world 2 bone xform
+  Fvector b_hsize;
+  Fsphere s_sphere;
+  Fcylinder c_cylinder;
+  u16 type;
+  u16 elem_id;
+  
+  SElement() : elem_id(u16(-1)), type(0);
+  SElement(u16 id, u16 t) : elem_id(id), type(t);
+  BOOL valid() const;
+  void center(Fvector& center) const;
+};
+
+class CCF_Skeleton : public ICollisionForm
+{
+public:
+	DEFINE_VECTOR(SElement, ElementVec, ElementVecIt);
+  
+public:
+	CCF_Skeleton(CObject* _owner);
+	virtual BOOL _RayQuery(const collide::ray_defs& Q, collide::rq_results& R);
+	bool _ElementCenter(u16 elem_id, Fvector& e_center);
+	const ElementVec& _GetElements();
+  void _dbg_refresh();
+  
+private:
+	u64 vis_mask;
+	ElementVec elements;
+	u32 dwFrame; // The model itself
+	u32 dwFrameTL; // Top level
+  
+private:
+	void BuildState();
+	void BuildTopLevel();
+};
+
+class CCF_EventBox : public ICollisionForm
+{
+private:
+	Fplane Planes[6];
+  
+public:
+	CCF_EventBox(CObject* _owner);
+	virtual BOOL _RayQuery(const collide::ray_defs& Q, collide::rq_results& R);
+	BOOL Contact(CObject* O);
+};
+
+struct shape_def
+{
+  int type;
+  shape_data data;
+};
+
+class CCF_Shape : public ICollisionForm
+{
+public:  
+  Fmatrix box;
+	Fmatrix ibox;
+  Fsphere sphere;
+	xr_vector<shape_def> shapes;
+  
+public:
+	CCF_Shape(CObject* _owner);
+	virtual BOOL _RayQuery(const collide::ray_defs& Q, collide::rq_results& R);
+	void add_sphere(Fsphere& S);
+	void add_box(Fmatrix& B);
+	void ComputeBounds();
+	BOOL Contact(CObject* O);
+	xr_vector<shape_def>& Shapes();
+};
+
+struct STranspParam
+{
+	Fvector P;
+	Fvector D;
+	float f;
+	collide::ray_cache* pray_cache;
+	float vis;
+	float vis_threshold;
+
+	STranspParam(collide::ray_cache* p, const Fvector& _P, const Fvector& _D, float _f, float _vis_threshold) :
+		P(_P), D(_D), f(_f), pray_cache(p), vis(1.f), vis_threshold(_vis_threshold);
+};
 
 
+struct SSource : public SFlare
+{
+  BOOL ignore_color;
+};
+
+struct SFlare
+{
+  float fOpacity;
+  float fRadius;
+  float fPosition;
+  shared_str texture;
+  shared_str shader;
+  FactoryPtr<IFlareRender> m_pRender;
+  SFlare();
+};
+
+enum
+{
+  flFlare = (1 << 0),
+  flSource = (1 << 1),
+  flGradient = (1 << 2)
+};
+
+class CLensFlareDescriptor
+{
+public:
+	DEFINE_VECTOR(SFlare, FlareVec, FlareIt);
+	FlareVec m_Flares;
+	Flags32 m_Flags;
+	SSource m_Source;
+	SFlare m_Gradient;
+  shared_str section;
+	float m_StateBlendUpSpeed;
+	float m_StateBlendDnSpeed;
+  
+public:
+	CLensFlareDescriptor();
+	void load(CInifile* pIni, LPCSTR section);
+	void OnDeviceCreate();
+	void OnDeviceDestroy();
+  void SetGradient(float fMaxRadius, float fOpacity, LPCSTR tex_name, LPCSTR sh_name);
+	void SetSource(float fRadius, BOOL ign_color, LPCSTR tex_name, LPCSTR sh_name);
+	void AddFlare(float fRadius, float fOpacity, float fPosition, LPCSTR tex_name, LPCSTR sh_name);
+};
+
+DEFINE_VECTOR(CLensFlareDescriptor*, LensFlareDescVec, LensFlareDescIt);
+
+enum LFState
+{
+  lfsNone,
+  lfsIdle,
+  lfsHide,
+  lfsShow,
+};
+
+class CLensFlare
+{
+public:
+	const u32 MAX_RAYS = 5;
+
+public:
+	CLensFlare();
+	virtual ~CLensFlare();
+	void OnFrame(shared_str id);
+	void __fastcall Render(BOOL bSun, BOOL bFlares, BOOL bGradient);
+	void OnDeviceCreate();
+	void OnDeviceDestroy();
+	shared_str AppendDef(CEnvironment& environment, CInifile* pIni, LPCSTR sect);
+	void Invalidate();
+  
+protected:
+	float fBlend;
+	u32 dwFrame;
+	Fvector vSunDir;
+	Fvector vecLight;
+	Fvector vecX, vecY, vecDir, vecAxis, vecCenter;
+	BOOL bRender;
+	Fcolor LightColor;
+	float fGradientValue;
+	FactoryPtr<ILensFlareRender> m_pRender;
+	LensFlareDescVec m_Palette;
+	CLensFlareDescriptor* m_Current;
+  LFState m_State;
+	float m_StateBlend;
+  
+private:
+  friend class dxLensFlareRender;
+	collide::rq_results r_dest;
+	collide::ray_cache m_ray_cache[MAX_RAYS];
+};
+
+enum
+{
+  COUNT_MOUSE_BUTTONS = 8,
+  COUNT_MOUSE_AXIS = 3,
+  COUNT_KB_BUTTONS = 256
+};
+
+struct sxr_mouse
+{
+  DIDEVCAPS capabilities;
+  DIDEVICEINSTANCE deviceInfo;
+  DIDEVICEOBJECTINSTANCE objectInfo;
+  u32 mouse_dt;
+};
+
+struct sxr_key
+{
+  DIDEVCAPS capabilities;
+  DIDEVICEINSTANCE deviceInfo;
+  DIDEVICEOBJECTINSTANCE objectInfo;
+};
+
+
+class CInput : public pureFrame, public pureAppActivate, public pureAppDeactivate
+{
+public:
+	sxr_mouse mouse_property;
+	sxr_key key_property;
+	u32 dwCurTime;
+
+public:
+  void resetMouseState();
+	void SetAllAcquire(BOOL bAcquire = TRUE);
+	void SetMouseAcquire(BOOL bAcquire);
+	void SetKBDAcquire(BOOL bAcquire);
+	void iCapture(IInputReceiver* pc);
+	void iRelease(IInputReceiver* pc);
+	BOOL iGetAsyncKeyState(int dik);
+	BOOL iGetAsyncBtnState(int btn);
+	void iGetLastMouseDelta(Ivector2& p);
+	CInput(BOOL bExclusive = true, int deviceForInit = default_key);
+	~CInput();
+	virtual void _BCL OnFrame(void);
+	virtual void OnAppActivate(void);
+	virtual void OnAppDeactivate(void);
+	void DeactivateSoft();
+	IInputReceiver* CurrentIR();
+	void exclusive_mode(const bool& exclusive);
+	bool get_exclusive_mode();
+	void unacquire();
+	void acquire(const bool& exclusive);
+	bool get_dik_name(int dik, LPSTR dest, int dest_sz);
+	void feedback(u16 s1, u16 s2, float time);
+  
+private:
+	BENCH_SEC_SCRAMBLEMEMBER1
+	LPDIRECTINPUT8 pDI; // The DInput object
+	LPDIRECTINPUTDEVICE8 pMouse; // The DIDevice7 interface
+	LPDIRECTINPUTDEVICE8 pKeyboard; // The DIDevice7 interface
+	u32 timeStamp[COUNT_MOUSE_AXIS];
+	u32 timeSave[COUNT_MOUSE_AXIS];
+	int offs[COUNT_MOUSE_AXIS];
+	BOOL mouseState[COUNT_MOUSE_BUTTONS];
+	BOOL KBState[COUNT_KB_BUTTONS];
+  xr_vector<IInputReceiver*> cbStack;
+
+private:
+	HRESULT CreateInputDevice(LPDIRECTINPUTDEVICE8* device, GUID guidDevice, const DIDATAFORMAT* pdidDataFormat, u32 dwFlags, u32 buf_size);
+	void MouseUpdate();
+	void KeyUpdate();
+};
+
+class CCC_Quit : public IConsole_Command
+{
+public:
+	CCC_Quit(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_DbgStrCheck : public IConsole_Command
+{
+public:
+	CCC_DbgStrCheck(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_DbgStrDump : public IConsole_Command
+{
+public:
+	CCC_DbgStrDump(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_MotionsStat : public IConsole_Command
+{
+public:
+	CCC_MotionsStat(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_TexturesStat : public IConsole_Command
+{
+public:
+	CCC_TexturesStat(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_E_Dump : public IConsole_Command
+{
+public:
+	CCC_E_Dump(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_E_Signal : public IConsole_Command
+{
+public:
+	CCC_E_Signal(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_Help : public IConsole_Command
+{
+public:
+	CCC_Help(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_DumpOpenFiles : public IConsole_Command
+{
+public:
+	CCC_DumpOpenFiles(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_SaveCFG : public IConsole_Command
+{
+public:
+	CCC_SaveCFG(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_Start : public IConsole_Command
+{
+public:
+	CCC_Start(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+  
+private:
+	void parse(LPSTR dest, LPCSTR args, LPCSTR name);
+	void protect_Name_strlwr(LPSTR str);
+};
+
+class CCC_Disconnect : public IConsole_Command
+{
+public:
+	CCC_Disconnect(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_PART_Export : public IConsole_Command
+{
+public:
+	CCC_PART_Export(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_PART_Import : public IConsole_Command
+{
+public:
+	CCC_PART_Import(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_VID_Reset : public IConsole_Command
+{
+public:
+	CCC_VID_Reset(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_VidMode : public CCC_Token
+{
+private:
+	u32 _dummy;
+  
+public:
+	CCC_VidMode(LPCSTR N) : CCC_Token(N, &_dummy, NULL);
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual xr_token* GetToken();
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+};
+
+class CCC_Screenmode : public CCC_Token
+{
+public:
+	CCC_Screenmode(LPCSTR N) : CCC_Token(N, &g_screenmode, screen_mode_tokens);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_SND_Restart : public IConsole_Command
+{
+public:
+	CCC_SND_Restart(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_Gamma : public CCC_Float
+{
+public:
+	CCC_Gamma(LPCSTR N, float* V) : CCC_Float(N, V, 0.5f, 1.5f);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_ScopeFactor : public CCC_Float
+{
+public:
+	CCC_ScopeFactor(LPCSTR N, float* V) : CCC_Float(N, V, 0.01f, 1.0f);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_r2 : public CCC_Token
+{
+private:
+	typedef CCC_Token inherited;
+  
+public:
+	CCC_r2(LPCSTR N) : inherited(N, &renderer_value, NULL);
+	virtual ~CCC_r2();
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Save(IWriter* F);
+	virtual xr_token* GetToken();
+};
+
+class CCC_soundDevice : public CCC_Token
+{
+private:
+	typedef CCC_Token inherited;
+  
+public:
+	CCC_soundDevice(LPCSTR N) : inherited(N, &snd_device_id, NULL);
+	virtual ~CCC_soundDevice();
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual xr_token* GetToken();
+	virtual void Save(IWriter* F);
+};
+
+class CCC_ExclusiveMode : public IConsole_Command
+{
+private:
+	typedef IConsole_Command inherited;
+
+public:
+	CCC_ExclusiveMode(LPCSTR N) :	inherited(N);
+	virtual void Execute(LPCSTR args);
+	virtual void Save(IWriter* F);
+};
+
+class CCC_HideConsole : public IConsole_Command
+{
+public:
+	CCC_HideConsole(LPCSTR N) : IConsole_Command(N);
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+};
+
+class CCC_SoundParamsSmoothing : public CCC_Integer
+{
+public:
+	CCC_SoundParamsSmoothing(LPCSTR N, int* V, int _min = 0, int _max = 999) : CCC_Integer(N, V, _min, _max);
+	virtual void Execute(LPCSTR args);
+};
+
+class IConsole_Command
+{
+public:
+	friend class CConsole;
+  
+	typedef char TInfo[256];
+	typedef char TStatus[256];
+	typedef xr_vector<shared_str> vecTips;
+	typedef xr_vector<shared_str> vecLRU;
+  
+public:
+	IConsole_Command(LPCSTR N BENCH_SEC_SIGN) :	cName(N),	bEnabled(TRUE),	bLowerCaseArgs(TRUE),	bEmptyArgsHandled(FALSE);
+	virtual ~IConsole_Command();
+	LPCSTR Name();
+	void InvalidSyntax();
+	virtual void Execute(LPCSTR args) = 0;
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void Save(IWriter* F);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+	virtual void add_to_LRU(shared_str const& arg);
+	void add_LRU_to_tips(vecTips& tips);
+  
+protected:
+	LPCSTR cName;
+	bool bEnabled;
+	bool bLowerCaseArgs;
+	bool bEmptyArgsHandled;
+	vecLRU m_LRU;
+  const u32 LRU_MAX_COUNT = 10;
+	bool EQ(LPCSTR S1, LPCSTR S2);
+};
+
+class CCC_Mask : public IConsole_Command
+{
+public:
+	CCC_Mask(LPCSTR N, Flags32* V, u32 M) :	IConsole_Command(N),	value(V),	mask(M);
+	const BOOL GetValue() const;
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	Flags32* value;
+	u32 mask;
+};
+
+class CCC_ToggleMask : public IConsole_Command
+{  
+public:
+	CCC_ToggleMask(LPCSTR N, Flags32* V, u32 M) : IConsole_Command(N), value(V),	mask(M);
+	const BOOL GetValue() const;
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	Flags32* value;
+	u32 mask;
+};
+
+class CCC_Token : public IConsole_Command
+{  
+public:
+	CCC_Token(LPCSTR N, u32* V, xr_token* T) : IConsole_Command(N), value(V),	tokens(T);
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual xr_token* GetToken();
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	u32* value;
+	xr_token* tokens;
+};
+
+class CCC_Float : public IConsole_Command
+{  
+public:
+	CCC_Float(LPCSTR N, float* V, float _min = 0, float _max = 1) :	IConsole_Command(N), value(V),	min(_min), max(_max);
+	const float GetValue() const;
+	void GetBounds(float& fmin, float& fmax) const;
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	float* value;
+	float min, max;
+};
+
+class CCC_Vector3 : public IConsole_Command
+{  
+public:
+	CCC_Vector3(LPCSTR N, Fvector* V, const Fvector _min, const Fvector _max) :	IConsole_Command(N),	value(V);
+	const Fvector GetValue() const;
+	Fvector* GetValuePtr() const;
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	Fvector* value;
+	Fvector min, max;
+};
+
+class CCC_Vector4 : public IConsole_Command
+{  
+public:
+	CCC_Vector4(LPCSTR N, Fvector4* V, const Fvector4 _min, const Fvector4 _max) : IConsole_Command(N), value(V);
+	const Fvector4 GetValue() const;
+	Fvector4* GetValuePtr() const;
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	Fvector4* value;
+	Fvector4 min, max;
+};
+
+class CCC_IVector3 : public IConsole_Command
+{  
+public:
+  CCC_IVector3(LPCSTR N, Ivector3* V, const Ivector3 _min, const Ivector3 _max) : IConsole_Command(N), value(V);
+  const Ivector3 GetValue() const;
+  Ivector3* GetValuePtr() const;
+  virtual void Execute(LPCSTR args);
+  virtual void Status(TStatus& S);
+  virtual void Info(TInfo& I);
+  virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	Ivector3* value;
+	Ivector3 min, max;
+};
+
+class CCC_IVector4 : public IConsole_Command
+{
+public:
+  CCC_IVector4(LPCSTR N, Ivector4* V, const Ivector4 _min, const Ivector4 _max) :	IConsole_Command(N),	value(V);
+  const Ivector4 GetValue() const;
+  Ivector4* GetValuePtr() const;
+  virtual void Execute(LPCSTR args);
+  virtual void Status(TStatus& S);
+  virtual void Info(TInfo& I);
+  virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	Ivector4* value;
+	Ivector4 min, max;
+};
+
+class CCC_CrosshairColor : public CCC_IVector4
+{
+public:
+	CCC_CrosshairColor(LPCSTR N, Ivector4* V, const Ivector4 _min, const Ivector4 _max) :	CCC_IVector4(N, V, _min, _max);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_Integer : public IConsole_Command
+{  
+public:
+	const int GetValue() const;
+	void GetBounds(int& imin, int& imax) const;
+	CCC_Integer(LPCSTR N, int* V, int _min = 0, int _max = 999) : IConsole_Command(N), value(V), min(_min), max(_max);
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	int* value;
+	int min, max;
+};
+
+class CCC_String : public IConsole_Command
+{
+public:
+	CCC_String(LPCSTR N, LPSTR V, int _size = 2) : IConsole_Command(N), value(V),	size(_size);
+	virtual void Execute(LPCSTR args);
+	virtual void Status(TStatus& S);
+	virtual void Info(TInfo& I);
+	virtual void fill_tips(vecTips& tips, u32 mode);
+  
+protected:
+	LPSTR value;
+	int size;
+};
+
+class CCC_LoadCFG : public IConsole_Command
+{
+public:
+	virtual bool allow(LPCSTR cmd) { return true; };
+	CCC_LoadCFG(LPCSTR N);
+	virtual void Execute(LPCSTR args);
+};
+
+class CCC_LoadCFG_custom : public CCC_LoadCFG
+{
+private:
+	string64 m_cmd;
+  
+public:
+	CCC_LoadCFG_custom(LPCSTR cmd);
+	virtual bool allow(LPCSTR cmd);
+};
+
+struct TipString
+{
+	shared_str text;
+	int HL_start; // Highlight
+	int HL_finish;
+
+	TipString();
+	TipString(shared_str const& tips_text, int start_pos, int finish_pos);
+	TipString(LPCSTR tips_text, int start_pos, int finish_pos);
+	TipString(shared_str const& tips_text);
+	bool operator==(shared_str const& tips_text);
+};
+
+enum Console_mark
+{
+	no_mark = ' ',
+	mark0 = '~',
+	mark1 = '!',
+	mark2 = '@',
+	mark3 = '#',
+	mark4 = '$',
+	mark5 = '%',
+	mark6 = '^',
+	mark7 = '&',
+	mark8 = '*',
+	mark9 = '-',
+	mark10 = '+',
+	mark11 = '=',
+	mark12 = '/'
+};
+
+struct str_pred
+{
+  bool operator()(const char* x, const char* y) const;
+};
+
+class CConsole : public pureRender, public pureFrame,	public pureScreenResolutionChanged
+{
+public:
+	typedef xr_map<LPCSTR, IConsole_Command*, str_pred> vecCMD;
+	typedef vecCMD::iterator vecCMD_IT;
+	typedef vecCMD::const_iterator vecCMD_CIT;
+	typedef fastdelegate::FastDelegate0<void> Callback;
+	typedef xr_vector<shared_str> vecHistory;
+	typedef xr_vector<shared_str> vecTips;
+	typedef xr_vector<TipString> vecTipsEx;
+  
+  const u32 CONSOLE_BUF_SIZE = 1024;
+  const u32 VIEW_TIPS_COUNT = 14;
+  const u32 MAX_TIPS_COUNT = 220;
+
+public:
+	CConsole();
+	virtual ~CConsole();
+	virtual void Initialize();
+	virtual void Destroy();
+	virtual void OnRender();
+	virtual void _BCL OnFrame();
+	virtual void OnScreenResolutionChanged();
+	string64 ConfigFile;
+	bool bVisible;
+	vecCMD Commands;
+	void AddCommand(IConsole_Command* cc);
+	void RemoveCommand(IConsole_Command* cc);
+	void Show();
+	void Hide();
+	void Execute(LPCSTR cmd);
+	void ExecuteScript(LPCSTR str);
+	void ExecuteCommand(LPCSTR cmd, bool record_cmd = true);
+	void SelectCommand();
+	bool GetBool(LPCSTR cmd) const;
+	float GetFloat(LPCSTR cmd, float& min, float& max) const;
+	int GetInteger(LPCSTR cmd, int& min, int& max) const;
+	LPCSTR GetString(LPCSTR cmd) const;
+	LPCSTR GetToken(LPCSTR cmd) const;
+	xr_token* GetXRToken(LPCSTR cmd) const;
+	Fvector GetFVector(LPCSTR cmd) const;
+	Fvector* GetFVectorPtr(LPCSTR cmd) const;
+	IConsole_Command* GetCommand(LPCSTR cmd) const;
+
+protected:
+	text_editor::line_editor* m_editor;
+  int scroll_delta;
+	CGameFont* pFont;
+	CGameFont* pFont2;
+	FactoryPtr<IUIShader>* m_hShader_back;
+	POINT m_mouse_pos;
+	bool m_disable_tips;
+  
+protected:
+	text_editor::line_edit_control& ec();
+	bool is_mark(Console_mark type);
+	u32 get_mark_color(Console_mark type);
+	void DrawBackgrounds(bool bGame);
+	void DrawRect(Frect const& r, u32 color);
+	void OutFont(LPCSTR text, float& pos_y);
+	void Register_callbacks();
+	void xr_stdcall Screenshot();
+	void xr_stdcall Prev_log();
+	void xr_stdcall Next_log();
+	void xr_stdcall Begin_log();
+	void xr_stdcall End_log();
+	void xr_stdcall Find_cmd();
+	void xr_stdcall Find_cmd_back();
+	void xr_stdcall Prev_cmd();
+	void xr_stdcall Next_cmd();
+	void xr_stdcall Prev_tip();
+	void xr_stdcall Next_tip();
+	void xr_stdcall Begin_tips();
+	void xr_stdcall End_tips();
+	void xr_stdcall PageUp_tips();
+	void xr_stdcall PageDown_tips();
+	void xr_stdcall Execute_cmd();
+	void xr_stdcall Show_cmd();
+	void xr_stdcall Hide_cmd();
+	void xr_stdcall Hide_cmd_esc();
+	void xr_stdcall GamePause();
+	void add_cmd_history(shared_str const& str);
+	void next_cmd_history_idx();
+	void prev_cmd_history_idx();
+	void reset_cmd_history_idx();
+	void next_selected_tip();
+	void check_next_selected_tip();
+	void prev_selected_tip();
+	void check_prev_selected_tip();
+	void reset_selected_tip();
+	IConsole_Command* find_next_cmd(LPCSTR in_str, shared_str& out_str);
+	bool add_next_cmds(LPCSTR in_str, vecTipsEx& out_v);
+	bool add_internal_cmds(LPCSTR in_str, vecTipsEx& out_v);
+	void update_tips();
+	void select_for_filter(LPCSTR filter_str, vecTips& in_v, vecTipsEx& out_v);
+  
+private:
+	vecHistory m_cmd_history;
+	u32 m_cmd_history_max;
+	int m_cmd_history_idx;
+	shared_str m_last_cmd;
+	vecTips m_temp_tips;
+	vecTipsEx m_tips;
+	u32 m_tips_mode;
+	shared_str m_cur_cmd;
+	int m_select_tip;
+	int m_start_tip;
+	u32 m_prev_length_str;
+};
+
+struct SavedPosition
+{
+  u32 dwTime;
+  Fvector vPosition;
+};
+
+struct storage
+{
+  u32 net_ID : 16;
+  u32 bActiveCounter : 8;
+  u32 bEnabled : 1;
+  u32 bVisible : 1;
+  u32 bDestroy : 1;
+  u32 net_Local : 1;
+  u32 net_Ready : 1;
+  u32 net_SV_Update : 1;
+  u32 crow : 1;
+  u32 bPreDestroy : 1;
+};
+
+
+class CObject : public DLL_Pure, public ISpatial, public ISheduled,	public IRenderable,	public ICollidable
+{
+public:
+  u32 dbg_update_cl;
+	u32 dwFrame_UpdateCL;
+	u32 dwFrame_AsCrow;  
+  
+public:
+  void DBGGetProps(ObjectProperties& p) const;
+	void MakeMeCrow();
+	void IAmNotACrowAnyMore();
+	virtual BOOL AlwaysTheCrow();
+	bool AmICrow() const;
+	BOOL Local() const;
+	BOOL Remote() const;
+	u16 ID() const;
+	void setID(u16 _ID);
+	virtual BOOL Ready();
+	BOOL GetTmpPreDestroy() const;
+	void SetTmpPreDestroy(BOOL b);
+	virtual float shedule_Scale();
+	virtual bool shedule_Needed();
+	CObject* H_Parent();
+	const CObject* H_Parent() const;
+	CObject* H_Root();
+	const CObject* H_Root() const;
+	CObject* H_SetParent(CObject* O, bool just_before_destroy = false);
+	virtual void Center(Fvector& C) const;
+	const Fmatrix& XFORM() const;
+	Fmatrix& XFORM();
+	virtual void spatial_register();
+	virtual void spatial_unregister();
+	virtual void spatial_move();
+	void spatial_update(float eps_P, float eps_R);
+	Fvector& Direction();
+	const Fvector& Direction() const;
+	Fvector& Position();
+	const Fvector& Position() const;
+	virtual float Radius() const;
+	virtual const Fbox& BoundingBox() const;
+	IRender_Sector* Sector();
+	IRender_ObjectSpecific* ROS();
+	virtual BOOL renderable_ShadowGenerate();
+	virtual BOOL renderable_ShadowReceive();
+	IRenderVisual* Visual() const;
+	ICollisionForm* CFORM() const;
+	virtual CObject* dcast_CObject();
+	virtual IRenderable* dcast_Renderable();
+	virtual void OnChangeVisual();
+	virtual IPhysicsShell* physics_shell();
+	virtual const IObjectPhysicsCollision* physics_collision();
+	shared_str cName() const;
+	void cName_set(shared_str N);
+	shared_str cNameSect() const;
+	LPCSTR cNameSect_str() const;
+	void cNameSect_set(shared_str N);
+	shared_str cNameVisual() const;
+	void cNameVisual_set(shared_str N);
+	virtual shared_str shedule_Name() const;
+	void processing_activate();
+	void processing_deactivate();
+	bool processing_enabled();
+	void setVisible(BOOL _visible);
+	BOOL getVisible() const;
+	void setEnabled(BOOL _enabled);
+	BOOL getEnabled() const;
+	void setDestroy(BOOL _destroy);
+	BOOL getDestroy() const;
+	void setLocal(BOOL _local);
+	BOOL getLocal() const;
+	void setSVU(BOOL _svu);
+	BOOL getSVU() const;
+	void setReady(BOOL _ready);
+	BOOL getReady() const;
+	CObject();
+	virtual ~CObject();
+	virtual void Load(LPCSTR section);
+	virtual void shedule_Update(u32 dt); // Called by sheduler
+	virtual void renderable_Render();
+	virtual void UpdateCL(); // Called each frame, so no need for dt
+	virtual BOOL net_Spawn(CSE_Abstract* data);
+	virtual void net_Destroy();
+	virtual void net_Export(NET_Packet& P);
+	virtual void net_Import(NET_Packet& P);
+	virtual void net_ImportInput(NET_Packet& P);
+	virtual BOOL net_Relevant();
+	virtual void net_MigrateInactive(NET_Packet& P);
+	virtual void net_MigrateActive(NET_Packet& P);
+	virtual void net_Relcase(CObject* O);
+	u32 ps_Size() const;
+	virtual SavedPosition ps_Element(u32 ID) const;
+	virtual void ForceTransform(const Fmatrix& m);
+	virtual void OnHUDDraw(CCustomHUD* hud);
+	virtual void OnH_B_Chield(); // before
+	virtual void OnH_B_Independent(bool just_before_destroy);
+	virtual void OnH_A_Chield(); // after
+	virtual void OnH_A_Independent();
+	virtual void On_SetEntity();
+	virtual void On_LostEntity();
+	virtual bool register_schedule() const;
+	virtual Fvector get_new_local_point_on_mesh(u16& bone_id) const;
+	virtual Fvector get_last_local_point_on_mesh(Fvector const& last_point, u16 bone_id) const;
+  
+private:
+	ObjectProperties Props;
+	shared_str NameObject;
+	shared_str NameSection;
+	shared_str NameVisual;
+  
+protected:
+	CObject* Parent;
+	svector<SavedPosition, 4> PositionStack;
+};
+
+class fClassEQ
+{  
+public:
+	fClassEQ(CLASS_ID C) : cls(C);
+	bool operator()(CObject* O);
+  
+private:
+	CLASS_ID cls;
+};
+
+struct SRelcasePair
+{
+  int* m_ID;
+  RELCASE_CALLBACK m_Callback;
+
+  SRelcasePair(int* id, RELCASE_CALLBACK cb) : m_ID(id), m_Callback(cb);
+  bool operator==(RELCASE_CALLBACK cb);
+};
+
+class CObjectList
+{
+public:
+	typedef fastdelegate::FastDelegate1<CObject*> RELCASE_CALLBACK;
+	typedef xr_vector<SRelcasePair> RELCASE_CALLBACK_VEC;
+	RELCASE_CALLBACK_VEC m_relcase_callbacks;	
+
+public:
+	CObjectList();
+	~CObjectList();
+  void relcase_register(RELCASE_CALLBACK, int*);
+	void relcase_unregister(int*);
+	CObject* FindObjectByName(shared_str name);
+	CObject* FindObjectByName(LPCSTR name);
+	CObject* FindObjectByCLS_ID(CLASS_ID cls);
+	void Load();
+	void Unload();
+	CObject* Create(LPCSTR name);
+	void Destroy(CObject* O);
+	void SingleUpdate(CObject* O);
+	void Update(bool bForce);
+	void net_Register(CObject* O);
+	void net_Unregister(CObject* O);
+	u32 net_Export(NET_Packet* P, u32 _start, u32 _count); // return next start
+	void net_Import(NET_Packet* P);
+	CObject* net_Find(u16 ID) const;
+	void o_crow(CObject* O);
+	void o_remove(Objects& v, CObject* O);
+	void o_activate(CObject* O);
+	void o_sleep(CObject* O);
+	u32 o_count();
+	CObject* o_get_by_iterator(u32 _it);
+	bool dump_all_objects();
+	void register_object_to_destroy(CObject* object_to_destroy);
+  bool registered_object_to_destroy(const CObject* object_to_destroy) const;
+
+private:
+	Objects& get_crows();
+	static void clear_crow_vec(Objects& o);
+	static void dump_list(Objects& v, LPCSTR reason);
+  
+private:
+	CObject* map_NETID[0xffff];
+	typedef xr_vector<CObject*> Objects;
+	Objects destroy_queue;
+	Objects objects_active;
+	Objects objects_sleeping;
+	Objects m_crows[2];
+	u32 m_owner_thread_id;
+};
+
+typedef u32 Pixel;
+
+struct Image
+{
+	int xsize; /* horizontal size of the image in Pixels */
+	int ysize; /* vertical size of the image in Pixels */
+	Pixel* data; /* pointer to first scanline of image */
+	int span; /* byte offset between two scanlines */
+};
+
+struct CONTRIB
+{
+	int pixel;
+	float weight;
+};
+
+struct CLIST
+{
+	int n; /* number of contributors */
+	CONTRIB* p; /* pointer to _list_ of contributions */
+};
+
+enum EIMF_Type
+{
+	imf_filter = 0,
+	imf_box,
+	imf_triangle,
+	imf_bell,
+	imf_b_spline,
+	imf_lanczos3,
+	imf_mitchell,
+	imf_FORCEDWORD = 0xffffffff
+};
+
+struct xrGUID
+{
+	u64 g[2];
+	bool operator==(const xrGUID& o) const;
+	bool operator!=(const xrGUID& o) const;
+	void LoadLTX(CInifile& ini, LPCSTR section, LPCSTR name);
+	void SaveLTX(CInifile& ini, LPCSTR section, LPCSTR name);
+};
+
+enum fsL_Chunks
+{
+	fsL_HEADER = 1,
+	//*
+	fsL_SHADERS = 2,
+	//*
+	fsL_VISUALS = 3,
+	//*
+	fsL_PORTALS = 4,
+	//* - Portal polygons
+	fsL_LIGHT_DYNAMIC = 6,
+	//*
+	fsL_GLOWS = 7,
+	//* - All glows inside level
+	fsL_SECTORS = 8,
+	//* - All sectors on level
+	fsL_VB = 9,
+	//* - Static geometry
+	fsL_IB = 10,
+	//*
+	fsL_SWIS = 11,
+	//* - collapse info, usually for trees
+	fsL_forcedword = 0xFFFFFFFF
+};
+
+enum fsESectorChunks
+{
+	fsP_Portals = 1,
+	fsP_Root,
+	fsP_forcedword = u32(-1)
+};
+
+enum fsSLS_Chunks
+{
+	fsSLS_Description = 1,
+	fsSLS_ServerState,
+	fsSLS_forcedword = u32(-1)
+};
+
+enum EBuildQuality
+{
+	ebqDraft = 0,
+	ebqHigh,
+	ebqCustom,
+	ebq_force_u16 = u16(-1)
+};
+
+struct hdrLEVEL
+{
+	u16 XRLC_version;
+	u16 XRLC_quality;
+};
+
+struct hdrCFORM
+{
+	u32 version;
+	u32 vertcount;
+	u32 facecount;
+	Fbox aabb;
+};
+
+struct hdrNODES
+{
+	u32 version;
+	u32 count;
+	float size;
+	float size_y;
+	Fbox aabb;
+	xrGUID guid;
+};
+
+class NodePosition
+{
+	u8 data[5];
+
+	ICF void xz(u32 value)
+	{
+		CopyMemory(data, &value, 3);
+	}
+
+	ICF void y(u16 value)
+	{
+		CopyMemory(data + 3, &value, 2);
+	}
+
+public:
+	ICF u32 xz() const
+	{
+		return ((*((u32*)data)) & 0x00ffffff);
+	}
+
+	ICF u32 x(u32 row) const
+	{
+		return (xz() / row);
+	}
+
+	ICF u32 z(u32 row) const
+	{
+		return (xz() % row);
+	}
+
+	ICF u32 y() const
+	{
+		return (*((u16*)(data + 3)));
+	}
+
+	friend class CLevelGraph;
+	friend struct CNodePositionCompressor;
+	friend struct CNodePositionConverter;
+};
+
+struct SCover
+{
+  u16 cover0 : 4;
+  u16 cover1 : 4;
+  u16 cover2 : 4;
+  u16 cover3 : 4;
+  u16 cover(u8 index) const;
+};
+
+struct NodeCompressed
+{
+public:
+	u32 linknew(u8 index) const;
+	u32 link(u8 index) const;
+  
+public:
+	u8 data[12];
+	SCover high;
+	SCover low;
+	u16 plane;
+	NodePosition p;
+	friend class CLevelGraph;
+	friend struct CNodeCompressed;
+	friend class CNodeRenumberer;
+	friend class CRenumbererConverter;
+  
+private:
+	void link(u8 link_index, u32 value);
+	void linknew(u8 link_index, u32 value);
+	void light(u8 value);
+};
+
+struct SNodePositionOld
+{
+	s16 x;
+	u16 y;
+	s16 z;
+};
+
+class xrSASH
+{
+public:
+	xrSASH();
+	~xrSASH();
+	bool Init(const char* pszParam);
+	void MainLoop();
+	bool IsRunning();
+	bool IsBenchmarkRunning();
+	void StartBenchmark();
+	void DisplayFrame(float t);
+	void EndBenchmark();
+	void OnConsoleInvalidSyntax(bool bLastLine, const char* pszMsg, ...);
+
+private:
+	void LoopOA();
+	void LoopNative();
+	void ReportNative(LPCSTR pszTestName);
+	void GetAllOptions();
+	void GetCurrentOptions();
+	void SetOptions();
+	void GetBenchmarks();
+	void RunBenchmark(LPCSTR pszName);
+	void TryInitEngine(bool bNoRun = true);
+	void ReleaseEngine();
+
+private:
+	bool m_bInited;
+	bool m_bOpenAutomate;
+	bool m_bRunning;
+	bool m_bBenchmarkRunning;
+	bool m_bReinitEngine;
+	bool m_bExecutingConsoleCommand;
+	string64 m_strBenchCfgName;
+	CTimer m_FrameTimer;
+	xr_vector<float> m_aFrimeTimes;
+};
+
+struct Item
+	{
+		u32 dwTimeForExecute;
+		u32 dwTimeOfLastExecute;
+		shared_str scheduled_name;
+		ISheduled* Object;
+		u32 dwPadding;
+		bool operator<(Item& I);
+	};
+
+	struct ItemReg
+	{
+		BOOL OP;
+		BOOL RT;
+		ISheduled* Object;
+	};
+
+class CSheduler
+{  
+public:
+	u64 cycles_start;
+	u64 cycles_limit;
+  
+public:
+	void ProcessStep();
+	void Process();
+	void Update();
+  bool Registered(ISheduled* object) const;
+	void Register(ISheduled* A, BOOL RT = FALSE);
+	void Unregister(ISheduled* A);
+	void EnsureOrder(ISheduled* Before, ISheduled* After);
+	void Initialize();
+	void Destroy();
+  
+private:
+	xr_vector<Item> ItemsRT;
+	xr_vector<Item> Items;
+	xr_vector<Item> ItemsProcessed;
+	xr_vector<ItemReg> Registration;
+	ISheduled* m_current_step_obj;
+	bool m_processing_now;
+
+private:
+	void Push(Item& I);
+	void Pop();
+	Item& Top();
+	void internal_Register(ISheduled* A, BOOL RT = FALSE);
+	bool internal_Unregister(ISheduled* A, BOOL RT, bool warn_on_not_found = true);
+	void internal_Registration();
+};
+
+class CTheoraStream
+{  
+public:
+	CTheoraStream();
+	virtual ~CTheoraStream();
+	BOOL Load(const char* fname);
+	void Reset();
+	BOOL Decode(u32 tm_play);
+	yuv_buffer* CurrentFrame();
+  
+private:
+	friend class CTheoraSurface;
+
+	ogg_sync_state o_sync_state;
+	ogg_page o_page;
+	ogg_stream_state o_stream_state;
+	theora_info t_info;
+	theora_comment t_comment;
+	theora_state t_state;
+	CStreamReader* source;
+	yuv_buffer t_yuv_buffer;
+	ogg_int64_t d_frame;
+	u32 tm_total;
+	u32 key_rate; // theora have const key rate
+	float fpms;
+  
+protected:
+	int ReadData();
+	BOOL ParseHeaders();
+};
+
+class CTheoraSurface
+{  
+public:
+	BOOL playing;
+	BOOL looped;
+
+public:
+	CTheoraSurface();
+	virtual ~CTheoraSurface();
+	BOOL Valid();
+	BOOL Load(const char* fname);
+	BOOL Update(u32 _time);
+	void DecompressFrame(u32* dst, u32 _width, int& count);
+	void Play(BOOL _looped, u32 _time);
+	void Pause(BOOL _pause);
+	void Stop();
+	BOOL IsPlaying();
+	u32 Width(bool bRealSize);
+	u32 Height(bool bRealSize);
+  
+protected:
+	void Reset();
+  
+private:
+	CTheoraStream* m_rgb;
+	CTheoraStream* m_alpha;
+	u32 tm_start;
+	u32 tm_play;
+	u32 tm_total;
+	BOOL ready;
+	BOOL bShaderYUV2RGB;
+	int prefetch;
+};
 
 #define THUNDERBOLT_CACHE_SIZE 8
 #define HUD_CROSSHAIR (1<<0)
@@ -5713,8 +7217,33 @@ public:
 #define CLSID_GAME_LEVEL MK_CLSID('G','_','L','E','V','E','L',' ')
 #define CLSID_GAME_PERSISTANT MK_CLSID('G','_','P','E','R','S','I','S')
 #define CLSID_OBJECT MK_CLSID('O','B','J','E','C','T',' ',' ')
+#define DEFAULT_MODULE_HASH "3CAABCFCFF6F3A810019C6A72180F166"
+#define BLEND_INC_SPEED 8.0f
+#define BLEND_DEC_SPEED 4.0f
+#define MOUSE_1 (0xED + 100)
+#define MOUSE_8 (0xED + 107)
+#define DIRECTINPUT_VERSION 0x0800
+#define CROW_RADIUS (30.f)
+#define CROW_RADIUS2 (60.f)
+#define HEMI1_VERTS 26
+#define HEMI1_FACES 40
+#define HEMI2_VERTS 91
+#define HEMI2_FACES 160
+#define HEMI3_VERTS 196
+#define WHITE_PIXEL (255)
+#define BLACK_PIXEL (0)
+#define filter_support (1.0)
+#define box_support (0.5)
+#define triangle_support (1.0)
+#define bell_support (1.5)
+#define B_spline_support (2.0)
+#define Lanczos3_support (3.0)
+#define Mitchell_support (2.0)
+#define B (1.0f / 3.0f)
+#define C (1.0f / 3.0f)
 
-
+float ps_gamma = 1.f, ps_brightness = 1.f, ps_contrast = 1.f;
+static char szEngineHash[33] = DEFAULT_MODULE_HASH;
 float psCamInert = 0.f;
 float psCamSlideInert = 0.25f;
 u32 psCurrentBPP = 32;
@@ -5759,3 +7288,94 @@ const f32 KEY_QuantI = 1.f / KEY_Quant;
 const float fQuantizerRangeExt = 1.5f;
 int g_ErrorLineCount = 15;
 int g_svTextConsoleUpdateRate = 1;
+BOOL g_bIntroFinished = FALSE;
+float discord_update_rate = .5f;
+bool use_reshade = false;
+static LPSTR month_id[12] =
+{
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+static int days_in_month[12] =
+{
+	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+};
+static int start_day = 31; // 31
+static int start_month = 1; // January
+static int start_year = 1999; // 1999
+const u32 clGET_TRIS = (1 << 0);
+const u32 clGET_BOXES = (1 << 1);
+const u32 clGET_SPHERES = (1 << 2);
+const u32 clQUERY_ONLYFIRST = (1 << 3); // stop if was any collision
+const u32 clQUERY_TOPLEVEL = (1 << 4); // get only top level of model box/sphere
+const u32 clQUERY_STATIC = (1 << 5); // static
+const u32 clQUERY_DYNAMIC = (1 << 6); // dynamic
+const u32 clCOARSE = (1 << 7); // coarse test (triangles vs obb)
+float psMouseSens = 1.f;
+float psMouseSensScale = 1.f;
+Flags32 psMouseInvert = {FALSE};
+float stop_vibration_time = flt_max;
+int MOUSEBUFFERSIZE = 1024;
+int KEYBOARDBUFFERSIZE = 128;
+static bool g_exclusive = false;
+BOOL b_altF4 = FALSE;
+const int mouse_device_key = 1;
+const int keyboard_device_key = 2;
+const int all_device_key = mouse_device_key | keyboard_device_key;
+const int default_key = mouse_device_key | keyboard_device_key;
+u32 g_screenmode = 1;
+BOOL r2_sun_static = TRUE;
+BOOL r2_advanced_pp = FALSE;
+u32 renderer_value = 3;
+float psHUD_FOV_def = 0.45f;
+float psHUD_FOV = psHUD_FOV_def;
+int ps_r__Supersample = 1;
+float ps_r2_sun_shafts_min = 0.f;
+float ps_r2_sun_shafts_value = 1.f;
+float hit_modifier = 1.0f;
+float g_AimLookFactor = 1.f;
+int ps_framelimiter = 0;
+float g_ironsights_factor = 1.25f;
+float scope_fog_interp = 0.15f;
+float scope_fog_travel = 0.25f;
+float scope_fog_attack = 0.66f;
+float scope_fog_mattack = 0.25f;
+float scope_ca = 0.003f;
+float scope_outerblur = 1.0f;
+float scope_innerblur = 0.1f;
+float scope_scrollpower = 0.66f;
+float scope_brightness = 1.0f;
+float scope_radius = 0.f;
+float scope_fog_radius = 1.25f;
+float scope_fog_sharp = 4.0f;
+int scope_2dtexactive = 0.0;
+Fvector3 ssfx_wetness_multiplier = Fvector3().set(1.0f, 0.3f, 0.0f);
+static float const UI_BASE_WIDTH = 1024.0f;
+static float const UI_BASE_HEIGHT = 768.0f;
+static float const LDIST = 0.05f;
+static u32 const cmd_history_max = 64;
+static u32 const prompt_font_color = color_rgba(228, 228, 255, 255);
+static u32 const tips_font_color = color_rgba(230, 250, 230, 255);
+static u32 const cmd_font_color = color_rgba(138, 138, 245, 255);
+static u32 const cursor_font_color = color_rgba(255, 255, 255, 255);
+static u32 const total_font_color = color_rgba(250, 250, 15, 180);
+static u32 const default_font_color = color_rgba(250, 250, 250, 250);
+static u32 const back_color = color_rgba(20, 20, 20, 200);
+static u32 const tips_back_color = color_rgba(20, 20, 20, 200);
+static u32 const tips_select_color = color_rgba(90, 90, 140, 230);
+static u32 const tips_word_color = color_rgba(5, 100, 56, 200);
+static u32 const tips_scroll_back_color = color_rgba(15, 15, 15, 230);
+static u32 const tips_scroll_pos_color = color_rgba(70, 70, 70, 240);
+char const* const ioc_prompt = ">>> ";
+char const* const ch_cursor = "_";
+const float base_spu_epsP = 0.05f;
+const float base_spu_epsR = 0.05f;
+int g_Dump_Export_Obj = 0;
+const u32 XRCL_CURRENT_VERSION = 18; //17; // input
+const u32 XRCL_PRODUCTION_VERSION = 14; // output
+const u32 CFORM_CURRENT_VERSION = 4;
+const u32 MAX_NODE_BIT_COUNT = 24;
+const u32 XRAI_CURRENT_VERSION = 10;
+float psShedulerCurrent = 10.f;
+float psShedulerTarget = 10.f;
+const float psShedulerReaction = 0.1f;
+BOOL g_bSheduleInProgress = FALSE;
