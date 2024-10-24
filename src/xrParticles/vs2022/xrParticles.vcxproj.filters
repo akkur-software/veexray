@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Kernel">
-      <UniqueIdentifier>{1be99a29-65a6-463c-a712-a70905646cad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="PAPI">
-      <UniqueIdentifier>{d7e57b42-cf91-4e84-8c34-45e6d4a43f3d}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\noise.h" />
     <ClInclude Include="..\particle_actions.h" />
     <ClInclude Include="..\particle_actions_collection.h" />
