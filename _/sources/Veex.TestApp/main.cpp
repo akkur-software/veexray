@@ -15,5 +15,8 @@ int main()
     ::printf("UUID4 (2): %s\n", uuid2.ToString().data());
     ::printf("UUID4 (3): %s\n", uuid3.ToString().data());
 
+    Uuid4* uuid4 = nullptr;
+    auto isEquals = &uuid3 == uuid4;
+
     return ::getchar();
 }
