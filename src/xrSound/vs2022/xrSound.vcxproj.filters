@@ -1,35 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Kernel">
-      <UniqueIdentifier>{71080056-c117-42e6-89f2-e97ae0912ff7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core">
-      <UniqueIdentifier>{1bd9edde-2f68-48c5-b6fc-9653cc535512}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\OpenAL">
-      <UniqueIdentifier>{678eb1bd-1fee-4d93-a5f5-48beedc1048e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Emitter">
-      <UniqueIdentifier>{0c156140-abd6-404c-93a3-adbe3a88025a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source">
-      <UniqueIdentifier>{1a016e10-ae18-4f0d-9ed2-40fcf254da83}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Target">
-      <UniqueIdentifier>{704dd21d-adae-4120-a40d-52b6f989eeac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Target\OpenAL">
-      <UniqueIdentifier>{78af2929-abf7-471a-ad73-84c55ce54450}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Environment">
-      <UniqueIdentifier>{ea9d1124-af1e-471f-a0a0-d2d77275a8ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Cache">
-      <UniqueIdentifier>{9143e5b9-296c-4d3e-8424-83f75457dfa9}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\cl_intersect.h" />
     <ClInclude Include="..\OpenALDeviceList.h" />
     <ClInclude Include="..\Sound.h" />
