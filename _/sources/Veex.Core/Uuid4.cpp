@@ -6,6 +6,36 @@
 
 namespace Veex::Core
 {
+    /// <summary>
+    /// Размер UUID (в байтах)
+    /// </summary>
+    constexpr size_t UUID_SIZE = 16;
+
+    /// <summary>
+    /// Размер строкового представления UUID
+    /// </summary>
+    constexpr size_t UUID_STRING_SIZE = 36;
+
+    /// <summary>
+    /// Символ разделителя UUID (дефис)
+    /// </summary>
+    constexpr char DASH_CHAR = '-';
+
+    /// <summary>
+    /// Символ, определяющий версию UUID
+    /// </summary>
+    constexpr char VERSION_CHAR = '4';
+
+    /// <summary>
+    /// Позиции разделителей в UUID
+    /// </summary>
+    constexpr std::array<size_t, 4> UUID_DASH_POSITIONS({ 8, 13, 18, 23 });
+
+    /// <summary>
+    /// Набор значений для конвертации байтов в строковое hex-представление
+    /// </summary>
+    constexpr std::array<char, 16> HEX_VALUES({ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' });
+    
     static std::random_device rd;
     static std::mt19937 mt(rd());
     static std::uniform_int_distribution<uint64_t> uid(
@@ -136,20 +166,10 @@ namespace Veex::Core
         });
     }
 
-    bool operator==(const Uuid4& lhs, const Uuid4& rhs)
+    bool Uuid4::operator==(const Uuid4& other)
     {
-        if ((&lhs == nullptr) ^ (&rhs == nullptr))
-        {
-            return false;
-        }
-
-        if (&lhs == nullptr && &rhs == nullptr)
-        {
-            return true;
-        }
-
-        auto lhsValue = lhs.Value();
-        auto rhsValue = rhs.Value();
+        auto lhsValue = this->Value();
+        auto rhsValue = other.Value();
 
         return
             lhsValue[0] == rhsValue[0] &&
@@ -170,9 +190,9 @@ namespace Veex::Core
             lhsValue[15] == rhsValue[15];
     }
 
-    bool operator!=(const Uuid4& lhs, const Uuid4& rhs)
+    bool Uuid4::operator!=(const Uuid4& other)
     {
-        return !(lhs == rhs);
+        return !(this == &other);
     }
 
     std::array<uint8_t, 16> Uuid4::parse(std::string_view uuidString)

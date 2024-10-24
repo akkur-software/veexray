@@ -6,37 +6,6 @@
 
 namespace Veex::Core
 {
-
-    /// <summary>
-    /// Размер UUID (в байтах)
-    /// </summary>
-    constexpr size_t UUID_SIZE = 16;
-
-    /// <summary>
-    /// Размер строкового представления UUID
-    /// </summary>
-    constexpr size_t UUID_STRING_SIZE = 36;
-
-    /// <summary>
-    /// Символ разделителя UUID (дефис)
-    /// </summary>
-    constexpr char DASH_CHAR = '-';
-
-    /// <summary>
-    /// Символ, определяющий версию UUID
-    /// </summary>
-    constexpr char VERSION_CHAR = '4';
-
-    /// <summary>
-    /// Позиции разделителей в UUID
-    /// </summary>
-    constexpr std::array<size_t, 4> UUID_DASH_POSITIONS({ 8, 13, 18, 23 });
-
-    /// <summary>
-    /// Набор значений для конвертации байтов в строковое hex-представление
-    /// </summary>
-    constexpr std::array<char, 16> HEX_VALUES({ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' });
-
     /// <summary>
     /// Универсальный уникальный идентификатор (UUID) v4
     /// </summary>
@@ -70,7 +39,17 @@ namespace Veex::Core
         /// <summary>
         /// Строковое представление идентификатора
         /// </summary>
-        std::string_view VEEX_CORE_API ToString() const;
+        std::string_view VEEX_CORE_API ToString() const;        
+
+        /// <summary>
+        /// Равны ли указанные UUID
+        /// </summary>
+        bool VEEX_CORE_API operator==(const Uuid4& other);
+
+        /// <summary>
+        /// Не равны ли указанные UUID
+        /// </summary>
+        bool VEEX_CORE_API operator!=(const Uuid4& other);
 
         /// <summary>
         /// Парсинг строки, содержащей UUID
@@ -78,16 +57,6 @@ namespace Veex::Core
         /// <param name="uuidString">Строка, являющаяся представлением UUID v4</param>
         /// <returns>Новый экземпляр Uuid</returns>
         static Uuid4 VEEX_CORE_API  Parse(std::string_view uuidString);
-
-        /// <summary>
-        /// Равны ли указанные UUID
-        /// </summary>
-        friend bool VEEX_CORE_API operator==(const Uuid4& lhs, const Uuid4& rhs);
-
-        /// <summary>
-        /// Не равны ли указанные UUID
-        /// </summary>
-        friend bool VEEX_CORE_API operator!=(const Uuid4& lhs, const Uuid4& rhs);
 
     private:
         std::array<uint8_t, 8> toByteArray(uint64_t value);
